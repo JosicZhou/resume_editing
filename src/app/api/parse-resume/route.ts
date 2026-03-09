@@ -297,6 +297,18 @@ export async function POST(request: NextRequest) {
         body: pdfFormData,
       });
 
+      const contentType = pdfRes.headers.get("content-type") || "";
+      if (!contentType.includes("application/json")) {
+        // 返回 HTML 说明服务正在从休眠唤醒（Render 免费层）
+        return NextResponse.json(
+          {
+            error: "PDF 服务正在启动中，请稍等 30 秒后重试",
+            detail: "服务从休眠状态唤醒需要约 30~60 秒，这是免费部署的正常现象"
+          },
+          { status: 503 }
+        );
+      }
+
       if (!pdfRes.ok) {
         const errorData = await pdfRes.json();
         return NextResponse.json(
@@ -320,7 +332,7 @@ export async function POST(request: NextRequest) {
         {
           error: "PDF 提取服务连接失败",
           detail: err instanceof Error ? err.message : String(err),
-          hint: "请确保 Python PDF 服务正在运行（端口 5001）"
+          hint: "请确保 Python PDF 服务正在运行"
         },
         { status: 500 }
       );

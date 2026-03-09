@@ -59,12 +59,15 @@ export default function ServerWakeup({ onOnline }: Props) {
     setSeconds(0);
 
     // 主动发送唤醒请求到 Render 服务器
+    console.log("🚀 发送唤醒请求...");
     try {
-      await fetch("/api/server-status?wake=true", {
+      const response = await fetch("/api/server-status?wake=true", {
         method: "GET",
       });
+      const data = await response.json();
+      console.log("✅ 唤醒请求响应:", data);
     } catch (error) {
-      console.log("Wake request sent, waiting for server to start...");
+      console.error("❌ 唤醒请求失败:", error);
     }
 
     // 立即 ping 一次，有可能已经唤醒

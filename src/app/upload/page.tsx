@@ -19,6 +19,7 @@ export default function UploadPage() {
   const [parsing, setParsing] = useState(false);
   const [parseResult, setParseResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loadingMessage, setLoadingMessage] = useState<string>("AI 解析中...");
   const [showOverwriteConfirm, setShowOverwriteConfirm] = useState(false);
   const [pendingResumeData, setPendingResumeData] = useState<any>(null);
   const [apiModalOpen, setApiModalOpen] = useState(false);
@@ -59,8 +60,9 @@ export default function UploadPage() {
     if (!file) return;
     setParsing(true);
     setError(null);
+    setLoadingMessage("AI 解析中...");
 
-    try {
+    const doRequest = async (): Promise<boolean> => {
       const formData = new FormData();
       formData.append("file", file);
       if (apiConfig.apiUrl && apiConfig.apiKey && apiConfig.model) {
@@ -79,10 +81,14 @@ export default function UploadPage() {
         body: formData,
       });
 
+      // PDF 服务正在从休眠唤醒，自动重试
+      if (res.status === 503) {
+        return false;
+      }
+
       const data = await res.json();
 
       if (!res.ok) {
-        // 优先展示后端返回的具体原因（如 API 401、模型名错误等）
         const msg = data.detail || data.error || "解析失败";
         throw new Error(msg);
       }
@@ -98,10 +104,30 @@ export default function UploadPage() {
       } else if (data.rawText) {
         setParseResult("text-only");
       }
+      return true;
+    };
+
+    try {
+      // 最多等待 90 秒（重试 6 次，每次间隔 15 秒）
+      const maxRetries = 6;
+      for (let i = 0; i < maxRetries; i++) {
+        const success = await doRequest();
+        if (success) return;
+
+        const remaining = (maxRetries - i - 1) * 15;
+        setLoadingMessage(
+          i === 0
+            ? "PDF 服务启动中，请稍等..."
+            : `PDF 服务启动中，预计还需 ${remaining} 秒...`
+        );
+        await new Promise((resolve) => setTimeout(resolve, 15000));
+      }
+      throw new Error("PDF 服务启动超时，请稍后再试");
     } catch (e) {
       setError(e instanceof Error ? e.message : "简历解析失败，请检查文件格式后重试");
     } finally {
       setParsing(false);
+      setLoadingMessage("AI 解析中...");
     }
   };
 
@@ -213,7 +239,7 @@ export default function UploadPage() {
               <Button onClick={handleParse} disabled={parsing} size="lg">
                 {parsing ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" /> AI 解析中...
+                    <Loader2 className="w-4 h-4 animate-spin" /> {loadingMessage}
                   </>
                 ) : (
                   <>

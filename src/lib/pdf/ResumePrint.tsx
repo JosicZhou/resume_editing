@@ -363,7 +363,13 @@ const ResumePrint = React.forwardRef<HTMLDivElement, ResumePrintProps>(
               const portfolioSections = (resume.customSections || []).filter(
                 (sec) => sec.title === "作品集" || sec.title === "个人网站"
               );
-              const firstPortfolio = portfolioSections
+              // 优先查找"作品集"，如果没有再找"个人网站"
+              const sortedSections = portfolioSections.sort((a, b) => {
+                if (a.title === "作品集" && b.title === "个人网站") return -1;
+                if (a.title === "个人网站" && b.title === "作品集") return 1;
+                return 0;
+              });
+              const firstPortfolio = sortedSections
                 .flatMap((sec) => sec.items.map((item) => ({ ...item, sectionTitle: sec.title })))
                 .find((item) => item.imageUrl);
               if (!firstPortfolio) return null;

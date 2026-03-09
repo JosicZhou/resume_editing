@@ -234,6 +234,25 @@ export default function PreviewPage() {
             >
               <X className="w-3 h-3 text-destructive" />
             </button>
+
+            {/* Hover tooltip with job details */}
+            <div className="absolute left-0 top-full mt-2 w-[500px] max-w-[90vw] bg-card border border-border rounded-lg shadow-lg p-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+              <div className="space-y-3">
+                <div>
+                  <h4 className="font-semibold text-sm mb-1">{job.company} - {job.title}</h4>
+                  <p className="text-xs text-muted-foreground">创建于 {new Date(job.createdAt).toLocaleDateString()}</p>
+                </div>
+
+                {job.rawText && (
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground mb-1.5">岗位描述（JD）</p>
+                    <div className="text-xs text-muted-foreground max-h-60 overflow-y-auto whitespace-pre-wrap bg-muted/30 rounded p-2">
+                      {job.rawText}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         ))}
       </div>

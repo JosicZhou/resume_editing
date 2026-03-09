@@ -7,6 +7,7 @@ import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import StepNavigation from "@/components/layout/StepNavigation";
 import ApiConfigModal from "@/components/layout/ApiConfigModal";
+import ServerWakeup from "@/components/layout/ServerWakeup";
 import { Upload, FileText, CheckCircle, Loader2, AlertCircle, KeyRound } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -19,8 +20,7 @@ export default function UploadPage() {
   const [parsing, setParsing] = useState(false);
   const [parseResult, setParseResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [serverStatus, setServerStatus] = useState<null | "starting" | "ready">(null);
-  const [wakingSeconds, setWakingSeconds] = useState(0);
+  const [serverOnline, setServerOnline] = useState(false);
   const [showOverwriteConfirm, setShowOverwriteConfirm] = useState(false);
   const [pendingResumeData, setPendingResumeData] = useState<any>(null);
   const [apiModalOpen, setApiModalOpen] = useState(false);
@@ -61,32 +61,25 @@ export default function UploadPage() {
     if (!file) return;
     setParsing(true);
     setError(null);
-    setServerStatus(null);
-    setWakingSeconds(0);
 
-    const buildFormData = () => {
-      const formData = new FormData();
-      formData.append("file", file);
-      if (apiConfig.apiUrl && apiConfig.apiKey && apiConfig.model) {
-        formData.append(
-          "apiConfig",
-          JSON.stringify({
-            apiUrl: apiConfig.apiUrl,
-            apiKey: apiConfig.apiKey,
-            model: apiConfig.model,
-          })
-        );
-      }
-      return formData;
-    };
+    const formData = new FormData();
+    formData.append("file", file);
+    if (apiConfig.apiUrl && apiConfig.apiKey && apiConfig.model) {
+      formData.append(
+        "apiConfig",
+        JSON.stringify({
+          apiUrl: apiConfig.apiUrl,
+          apiKey: apiConfig.apiKey,
+          model: apiConfig.model,
+        })
+      );
+    }
 
-    const doRequest = async (): Promise<boolean> => {
+    try {
       const res = await fetch("/api/parse-resume", {
         method: "POST",
-        body: buildFormData(),
+        body: formData,
       });
-
-      if (res.status === 503) return false;
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || data.error || "解析失败");
@@ -102,31 +95,7 @@ export default function UploadPage() {
       } else if (data.rawText) {
         setParseResult("text-only");
       }
-      return true;
-    };
-
-    try {
-      const maxRetries = 6;
-      let elapsed = 0;
-      for (let i = 0; i < maxRetries; i++) {
-        const success = await doRequest();
-        if (success) {
-          setServerStatus(null);
-          return;
-        }
-        // 首次 503：进入启动中状态，启动倒计时
-        setServerStatus("starting");
-        const interval = setInterval(() => {
-          elapsed += 1;
-          setWakingSeconds(elapsed);
-        }, 1000);
-        await new Promise((resolve) => setTimeout(resolve, 15000));
-        clearInterval(interval);
-      }
-      // 超时后服务可能已就绪，提示用户手动重试
-      setServerStatus("ready");
     } catch (e) {
-      setServerStatus(null);
       setError(e instanceof Error ? e.message : "简历解析失败，请检查文件格式后重试");
     } finally {
       setParsing(false);
@@ -161,7 +130,8 @@ export default function UploadPage() {
 
       <Card>
         <CardContent className="py-6">
-          <div
+          <ServerWakeup onOnline={() => setServerOnline(true)} />
+          <div className={`mt-4 ${!serverOnline ? "opacity-40 pointer-events-none select-none" : ""}`}>
             onDragOver={(e) => {
               e.preventDefault();
               setDragOver(true);
@@ -216,48 +186,6 @@ export default function UploadPage() {
             </div>
           )}
 
-          {serverStatus === "starting" && (
-            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <div className="flex items-center gap-2 text-blue-700 mb-3">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span className="font-medium">服务器启动中</span>
-                <span className="text-blue-500 text-sm ml-auto">{wakingSeconds}s</span>
-              </div>
-              <div className="space-y-2 text-sm text-blue-600">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
-                  <span>正在唤醒服务器，请耐心等待...</span>
-                </div>
-                <div className="flex items-center gap-2 text-blue-400">
-                  <div className="w-2 h-2 rounded-full bg-blue-200" />
-                  <span>启动完成后将自动继续解析</span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {serverStatus === "ready" && (
-            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <div className="flex items-center gap-2 text-blue-700 mb-2">
-                <CheckCircle className="w-4 h-4" />
-                <span className="font-medium">服务器启动完成</span>
-              </div>
-              <p className="text-sm text-blue-600 mb-3">
-                服务器已就绪，请重新点击「开始解析简历」继续。
-              </p>
-              <Button
-                size="sm"
-                onClick={() => {
-                  setServerStatus(null);
-                  setWakingSeconds(0);
-                  handleParse();
-                }}
-              >
-                <FileText className="w-4 h-4" /> 重新解析简历
-              </Button>
-            </div>
-          )}
-
           {showOverwriteConfirm && (
             <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
               <div className="flex items-center gap-2 text-amber-700 mb-3">
@@ -278,13 +206,12 @@ export default function UploadPage() {
             </div>
           )}
 
-          {file && !parseResult && !showOverwriteConfirm && serverStatus !== "ready" && (
+          {file && !parseResult && !showOverwriteConfirm && (
             <div className="mt-6 flex justify-center">
               <Button onClick={handleParse} disabled={parsing} size="lg">
                 {parsing ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    {serverStatus === "starting" ? "服务器启动中..." : "AI 解析中..."}
+                    <Loader2 className="w-4 h-4 animate-spin" /> AI 解析中...
                   </>
                 ) : (
                   <>
@@ -353,6 +280,7 @@ export default function UploadPage() {
               }
             }}
           />
+          </div>{/* end of serverOnline gated area */}
         </CardContent>
       </Card>
 

@@ -302,8 +302,8 @@ export async function POST(request: NextRequest) {
         // 返回 HTML 说明服务正在从休眠唤醒（Render 免费层）
         return NextResponse.json(
           {
-            error: "PDF 服务正在启动中，请稍等 30 秒后重试",
-            detail: "服务从休眠状态唤醒需要约 30~60 秒，这是免费部署的正常现象"
+            error: "服务器启动中，请稍等后重试",
+            detail: "服务器正在部署启动，预计需要 30~60 秒"
           },
           { status: 503 }
         );

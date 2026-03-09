@@ -559,6 +559,41 @@ ID: ${exp.id}
             >
               <X className="w-3 h-3 text-destructive" />
             </button>
+
+            {/* Hover tooltip with job details */}
+            <div className="absolute left-0 top-full mt-2 w-96 max-w-[90vw] bg-card border border-border rounded-lg shadow-lg p-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+              <div className="space-y-3">
+                <div>
+                  <h4 className="font-semibold text-sm mb-1">{job.company} - {job.title}</h4>
+                  <p className="text-xs text-muted-foreground">创建于 {new Date(job.createdAt).toLocaleDateString()}</p>
+                </div>
+
+                {job.keywords && job.keywords.length > 0 && (
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground mb-1.5">关键词</p>
+                    <div className="flex flex-wrap gap-1">
+                      {job.keywords.map((kw, idx) => (
+                        <Badge key={idx} variant="secondary" className="text-xs">{kw}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {job.requirements && job.requirements.length > 0 && (
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground mb-1.5">岗位要求</p>
+                    <ul className="text-xs space-y-1 text-muted-foreground">
+                      {job.requirements.slice(0, 5).map((req, idx) => (
+                        <li key={idx} className="line-clamp-1">• {req}</li>
+                      ))}
+                      {job.requirements.length > 5 && (
+                        <li className="text-primary">...还有 {job.requirements.length - 5} 条</li>
+                      )}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
           );
         })}

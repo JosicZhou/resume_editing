@@ -566,12 +566,7 @@ export default function OptimizePage() {
     if (currentTailored) {
       updateTailoredResume(currentTailored.id, { polishedDescriptions: next });
     }
-    // 自动写入 resume store
-    Object.entries(next).forEach(([id, descs]) => {
-      if (resume.work.find((w) => w.id === id)) updateWork(id, { descriptions: descs });
-      if ((resume.campus || []).find((c) => c.id === id)) updateCampus(id, { descriptions: descs });
-      if (resume.projects.find((p) => p.id === id)) updateProject(id, { descriptions: descs });
-    });
+    // 不自动写入简历库，保持原始内容不变
   };
 
   // ─── Rewrite single ────────────────────────
@@ -792,12 +787,7 @@ export default function OptimizePage() {
 
     // Always persist to store
     updateTailoredResume(tailoredId, { polishedDescriptions: merged });
-    // Auto-write to resume store
-    Object.entries(merged).forEach(([id, descs]) => {
-      if (resume.work.find((w) => w.id === id)) updateWork(id, { descriptions: descs });
-      if ((resume.campus || []).find((c) => c.id === id)) updateCampus(id, { descriptions: descs });
-      if (resume.projects.find((p) => p.id === id)) updateProject(id, { descriptions: descs });
-    });
+    // 不自动写入简历库，保持原始内容不变
 
     // Only update local display state if still viewing this job
     if (currentTailoredIdRef.current === tailoredId) {

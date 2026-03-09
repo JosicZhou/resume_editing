@@ -59,10 +59,13 @@ export default function ServerWakeup({ onOnline }: Props) {
     setSeconds(0);
 
     // 主动发送唤醒请求到 Render 服务器
-    console.log("🚀 发送唤醒请求...");
+    console.log("🚀 发送唤醒请求... wake=true");
     try {
-      const response = await fetch("/api/server-status?wake=true", {
+      const wakeUrl = "/api/server-status?wake=true";
+      console.log("📡 请求URL:", wakeUrl);
+      const response = await fetch(wakeUrl, {
         method: "GET",
+        cache: "no-store", // 禁用缓存
       });
       const data = await response.json();
       console.log("✅ 唤醒请求响应:", data);

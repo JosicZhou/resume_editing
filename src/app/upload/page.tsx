@@ -132,6 +132,7 @@ export default function UploadPage() {
         <CardContent className="py-6">
           <ServerWakeup onOnline={() => setServerOnline(true)} />
           <div className={`mt-4 ${!serverOnline ? "opacity-40 pointer-events-none select-none" : ""}`}>
+          <div
             onDragOver={(e) => {
               e.preventDefault();
               setDragOver(true);
@@ -269,6 +270,8 @@ export default function UploadPage() {
             </div>
           )}
 
+          </div>{/* gated wrapper end */}
+
           <ApiConfigModal
             open={apiModalOpen}
             onClose={() => {
@@ -280,7 +283,6 @@ export default function UploadPage() {
               }
             }}
           />
-          </div>{/* end of serverOnline gated area */}
         </CardContent>
       </Card>
 

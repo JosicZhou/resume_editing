@@ -2,13 +2,25 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import pdfplumber
 import io
+import logging
+import sys
 
 app = Flask(__name__)
 CORS(app)  # 允许 Next.js 跨域请求
 
+# 配置日志输出到 stdout，确保 Render 能捕获
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    stream=sys.stdout
+)
+logger = logging.getLogger(__name__)
+
 @app.route('/health', methods=['GET'])
 def health():
     """健康检查接口"""
+    logger.info("🏥 收到健康检查请求 - 服务器被唤醒")
+    print("🏥 收到健康检查请求 - 服务器被唤醒", flush=True)
     return jsonify({'status': 'ok'})
 
 @app.route('/extract', methods=['POST'])

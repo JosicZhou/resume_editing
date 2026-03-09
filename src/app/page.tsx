@@ -1,65 +1,131 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import Link from "next/link";
+import { useResumeStore } from "@/lib/store";
+import Button from "@/components/ui/Button";
+import Badge from "@/components/ui/Badge";
+import {
+  Upload,
+  Target,
+  Sparkles,
+  ClipboardCheck,
+  Eye,
+  ArrowRight,
+  CheckCircle,
+  FileText,
+} from "lucide-react";
+
+const steps = [
+  {
+    step: 1,
+    href: "/upload",
+    icon: Upload,
+    title: "上传简历",
+    desc: "上传 PDF 简历，AI 自动解析所有模块内容并存入简历库",
+  },
+  {
+    step: 2,
+    href: "/analyze",
+    icon: Target,
+    title: "岗位分析",
+    desc: "添加目标岗位 JD，AI 分析岗位要求和关键词",
+  },
+  {
+    step: 3,
+    href: "/tailor",
+    icon: ClipboardCheck,
+    title: "岗位匹配",
+    desc: "AI 根据 JD 分析结果智能匹配相关经历，确保简历垂直度",
+  },
+  {
+    step: 4,
+    href: "/optimize",
+    icon: Sparkles,
+    title: "AI 内容优化",
+    desc: "根据 JD 关键词优化简历描述，提高 AI 筛选通过率",
+  },
+  {
+    step: 5,
+    href: "/preview",
+    icon: Eye,
+    title: "预览导出",
+    desc: "最终检查简历内容，确认无误后导出为精美 PDF",
+  },
+];
+
+export default function HomePage() {
+  const resume = useResumeStore((s) => s.resume);
+  const hasResume =
+    resume.personal.name ||
+    resume.work.length > 0 ||
+    resume.projects.length > 0;
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="max-w-3xl mx-auto px-6 py-16">
+      {/* Hero */}
+      <div className="text-center mb-14">
+        <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-5">
+          <FileText className="w-8 h-8 text-white" />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+        <h1 className="text-3xl font-bold text-foreground mb-3">
+          根据 JD 精准优化你的简历
+        </h1>
+        <p className="text-muted-foreground text-lg max-w-lg mx-auto">
+          5 步流程，从上传到导出，AI 帮你分析岗位、匹配经历、优化描述
+        </p>
+      </div>
+
+      {/* Steps */}
+      <div className="space-y-3 mb-12">
+        {steps.map((s, i) => (
+          <Link key={s.href} href={s.href} className="block group">
+            <div className="flex items-center gap-5 p-5 rounded-xl border border-border bg-card hover:border-primary/40 hover:shadow-sm transition-all">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 group-hover:bg-primary group-hover:text-white transition-colors">
+                <s.icon className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground font-mono">
+                    STEP {s.step}
+                  </span>
+                  <h3 className="font-semibold text-foreground">{s.title}</h3>
+                </div>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  {s.desc}
+                </p>
+              </div>
+              <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+            </div>
+          </Link>
+        ))}
+      </div>
+
+      {/* Quick Start */}
+      <div className="text-center space-y-4">
+        {hasResume ? (
+          <>
+            <Badge variant="success">简历库已有数据</Badge>
+            <div className="flex justify-center gap-3">
+              <Link href="/analyze">
+                <Button size="lg">
+                  开始分析岗位 <ArrowRight className="w-4 h-4" />
+                </Button>
+              </Link>
+              <Link href="/profile">
+                <Button variant="outline" size="lg">
+                  管理简历库
+                </Button>
+              </Link>
+            </div>
+          </>
+        ) : (
+          <Link href="/upload">
+            <Button size="lg">
+              开始：上传简历 <ArrowRight className="w-4 h-4" />
+            </Button>
+          </Link>
+        )}
+      </div>
     </div>
   );
 }

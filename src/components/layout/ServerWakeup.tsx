@@ -57,6 +57,16 @@ export default function ServerWakeup({ onOnline }: Props) {
   const handleWake = async () => {
     setStatus("starting");
     setSeconds(0);
+
+    // 主动发送唤醒请求到 Render 服务器
+    try {
+      await fetch("/api/server-status?wake=true", {
+        method: "GET",
+      });
+    } catch (error) {
+      console.log("Wake request sent, waiting for server to start...");
+    }
+
     // 立即 ping 一次，有可能已经唤醒
     const online = await check();
     if (online) {

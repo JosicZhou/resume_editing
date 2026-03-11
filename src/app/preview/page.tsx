@@ -101,6 +101,7 @@ export default function PreviewPage() {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
     new Set(["education", "work", "campus", "project", "skill", "award"])
   );
+  const [useOriginalIds, setUseOriginalIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     setMounted(true);
@@ -121,13 +122,24 @@ export default function PreviewPage() {
     });
   }, [addExportRecord, currentJob, resume, currentTailored]);
 
-  // Priority: polished > rewritten > raw
-  const getDesc = (id: string, raw: string[]): string[] =>
-    currentTailored?.polishedDescriptions?.[id]?.length
+  const toggleUseOriginal = (id: string) => {
+    setUseOriginalIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  // Priority: if useOriginal is set, use raw; otherwise polished > rewritten > raw
+  const getDesc = (id: string, raw: string[]): string[] => {
+    if (useOriginalIds.has(id)) return raw;
+    return currentTailored?.polishedDescriptions?.[id]?.length
       ? currentTailored.polishedDescriptions[id]
       : currentTailored?.rewrittenDescriptions?.[id]?.length
       ? currentTailored.rewrittenDescriptions[id]
       : raw;
+  };
 
   const work = currentTailored
     ? resume.work.filter((w) =>
@@ -366,7 +378,10 @@ export default function PreviewPage() {
               </CardHeader>
               {expandedSections.has("work") && (
                 <CardContent className="space-y-4">
-                  {work.map((w) => (
+                  {work.map((w) => {
+                    const hasOptimized = currentTailored?.polishedDescriptions?.[w.id]?.length || currentTailored?.rewrittenDescriptions?.[w.id]?.length;
+                    const isUsingOriginal = useOriginalIds.has(w.id);
+                    return (
                     <div
                       key={w.id}
                       className="border-l-2 border-primary/30 pl-3"
@@ -382,9 +397,21 @@ export default function PreviewPage() {
                             </p>
                           )}
                         </div>
-                        <span className="text-xs text-muted-foreground">
-                          {w.startDate} - {w.endDate}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground">
+                            {w.startDate} - {w.endDate}
+                          </span>
+                          {hasOptimized && (
+                            <Button
+                              variant={isUsingOriginal ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => toggleUseOriginal(w.id)}
+                              className="text-xs h-6 px-2"
+                            >
+                              {isUsingOriginal ? "使用优化版" : "使用原文"}
+                            </Button>
+                          )}
+                        </div>
                       </div>
                       <EditableDescriptionList
                         items={getDesc(w.id, w.descriptions)}
@@ -393,7 +420,8 @@ export default function PreviewPage() {
                         }
                       />
                     </div>
-                  ))}
+                    );
+                  })}
                 </CardContent>
               )}
             </Card>
@@ -419,7 +447,10 @@ export default function PreviewPage() {
               </CardHeader>
               {expandedSections.has("campus") && (
                 <CardContent className="space-y-4">
-                  {campus.map((c) => (
+                  {campus.map((c) => {
+                    const hasOptimized = currentTailored?.polishedDescriptions?.[c.id]?.length || currentTailored?.rewrittenDescriptions?.[c.id]?.length;
+                    const isUsingOriginal = useOriginalIds.has(c.id);
+                    return (
                     <div key={c.id} className="border-l-2 border-primary/30 pl-3">
                       <div className="flex justify-between mb-1">
                         <div>
@@ -430,9 +461,21 @@ export default function PreviewPage() {
                             <p className="text-xs text-muted-foreground">{c.location}</p>
                           )}
                         </div>
-                        <span className="text-xs text-muted-foreground">
-                          {c.startDate} - {c.endDate}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground">
+                            {c.startDate} - {c.endDate}
+                          </span>
+                          {hasOptimized && (
+                            <Button
+                              variant={isUsingOriginal ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => toggleUseOriginal(c.id)}
+                              className="text-xs h-6 px-2"
+                            >
+                              {isUsingOriginal ? "使用优化版" : "使用原文"}
+                            </Button>
+                          )}
+                        </div>
                       </div>
                       <EditableDescriptionList
                         items={getDesc(c.id, c.descriptions)}
@@ -441,7 +484,8 @@ export default function PreviewPage() {
                         }
                       />
                     </div>
-                  ))}
+                    );
+                  })}
                 </CardContent>
               )}
             </Card>
@@ -467,7 +511,10 @@ export default function PreviewPage() {
               </CardHeader>
               {expandedSections.has("project") && (
                 <CardContent className="space-y-4">
-                  {projects.map((p) => (
+                  {projects.map((p) => {
+                    const hasOptimized = currentTailored?.polishedDescriptions?.[p.id]?.length || currentTailored?.rewrittenDescriptions?.[p.id]?.length;
+                    const isUsingOriginal = useOriginalIds.has(p.id);
+                    return (
                     <div
                       key={p.id}
                       className="border-l-2 border-primary/30 pl-3"
@@ -484,9 +531,21 @@ export default function PreviewPage() {
                             </p>
                           )}
                         </div>
-                        <span className="text-xs text-muted-foreground">
-                          {p.startDate} - {p.endDate}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground">
+                            {p.startDate} - {p.endDate}
+                          </span>
+                          {hasOptimized && (
+                            <Button
+                              variant={isUsingOriginal ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => toggleUseOriginal(p.id)}
+                              className="text-xs h-6 px-2"
+                            >
+                              {isUsingOriginal ? "使用优化版" : "使用原文"}
+                            </Button>
+                          )}
+                        </div>
                       </div>
                       <EditableDescriptionList
                         items={getDesc(p.id, p.descriptions)}
@@ -495,7 +554,8 @@ export default function PreviewPage() {
                         }
                       />
                     </div>
-                  ))}
+                    );
+                  })}
                 </CardContent>
               )}
             </Card>

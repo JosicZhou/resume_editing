@@ -467,7 +467,7 @@ export default function PreviewPage() {
                           </span>
                           {hasOptimized && (
                             <Button
-                              variant={isUsingOriginal ? "default" : "outline"}
+                              variant={isUsingOriginal ? "primary" : "outline"}
                               size="sm"
                               onClick={() => toggleUseOriginal(c.id)}
                               className="text-xs h-6 px-2"
@@ -537,7 +537,7 @@ export default function PreviewPage() {
                           </span>
                           {hasOptimized && (
                             <Button
-                              variant={isUsingOriginal ? "default" : "outline"}
+                              variant={isUsingOriginal ? "primary" : "outline"}
                               size="sm"
                               onClick={() => toggleUseOriginal(p.id)}
                               className="text-xs h-6 px-2"

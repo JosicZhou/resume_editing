@@ -278,6 +278,7 @@ export default function PreviewPage() {
               tailored={currentTailored}
               documentTitle={[resume.personal.name, currentJob?.title].filter(Boolean).join("_") || "resume"}
               onExport={handleExport}
+              useOriginalIds={Array.from(useOriginalIds)}
             />
           )}
         </div>
@@ -828,6 +829,7 @@ export default function PreviewPage() {
               tailored={currentTailored}
               documentTitle={[resume.personal.name, currentJob?.title].filter(Boolean).join("_") || "resume"}
               onExport={handleExport}
+              useOriginalIds={Array.from(useOriginalIds)}
             />
           </div>
         )}

@@ -6,19 +6,30 @@ import type { ResumeData, ResumeModule, TailoredResume } from "@/lib/types";
 interface ResumePrintProps {
   resume: ResumeData;
   tailored?: TailoredResume | null;
+  useOriginalIds?: string[];
 }
 
 const FONT_FAMILY =
   "'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'STHeiti', 'SimHei', Arial, sans-serif";
 
 const ResumePrint = React.forwardRef<HTMLDivElement, ResumePrintProps>(
-  function ResumePrint({ resume, tailored }, ref) {
+  function ResumePrint({ resume, tailored, useOriginalIds = [] }, ref) {
     const getTitle = (type: string, defaultTitle: string) => {
       if (tailored?.sectionTitleOverrides[type]) {
         return tailored.sectionTitleOverrides[type];
       }
       const mod = resume.moduleOrder.find((m) => m.type === type);
       return mod?.title || defaultTitle;
+    };
+
+    // Priority: if useOriginalIds contains the id, use raw; otherwise polished > rewritten > raw
+    const getDesc = (id: string, raw: string[]): string[] => {
+      if (useOriginalIds.includes(id)) return raw;
+      return tailored?.polishedDescriptions?.[id]?.length
+        ? tailored.polishedDescriptions[id]
+        : tailored?.rewrittenDescriptions?.[id]?.length
+        ? tailored.rewrittenDescriptions[id]
+        : raw;
     };
 
     const visibleModules = resume.moduleOrder
@@ -46,14 +57,6 @@ const ResumePrint = React.forwardRef<HTMLDivElement, ResumePrintProps>(
           tailored.selectedEducationIds.includes(e.id)
         )
       : resume.education;
-
-    // Priority: polished > rewritten > raw
-    const getDesc = (id: string, raw: string[]): string[] =>
-      tailored?.polishedDescriptions?.[id]?.length
-        ? tailored.polishedDescriptions[id]
-        : tailored?.rewrittenDescriptions?.[id]?.length
-        ? tailored.rewrittenDescriptions[id]
-        : raw;
 
     // Build labeled contact items
     const contactItems: { label: string; text: string }[] = [
@@ -123,10 +126,10 @@ const ResumePrint = React.forwardRef<HTMLDivElement, ResumePrintProps>(
               <div style={sectionTitle}>{getTitle("work", "工作/实习经历")}</div>
               {work.map((w) => (
                 <div key={w.id} style={entryWrap}>
-                  <div style={entryRow}>
-                    <span style={entryBold}>{w.company}</span>
-                    <span style={{...entryBold, flex: 1, textAlign: "center"}}>{w.title}</span>
-                    <span style={{...entryBold, fontSize: "8.5pt"}}>{w.startDate} — {w.endDate}</span>
+                  <div style={{...entryRow, gap: "16px"}}>
+                    <span style={{...entryBold, minWidth: "120px"}}>{w.company}</span>
+                    <span style={{...entryBold, flex: 1, textAlign: "center", minWidth: "0"}}>{w.title}</span>
+                    <span style={{...entryBold, fontSize: "8.5pt", whiteSpace: "nowrap"}}>{w.startDate} — {w.endDate}</span>
                   </div>
                   {getDesc(w.id, w.descriptions).length > 0 && (
                     <ol style={numList}>
@@ -147,10 +150,10 @@ const ResumePrint = React.forwardRef<HTMLDivElement, ResumePrintProps>(
               <div style={sectionTitle}>{getTitle("campus", "校园经历")}</div>
               {campus.map((c) => (
                 <div key={c.id} style={entryWrap}>
-                  <div style={entryRow}>
-                    <span style={entryBold}>{c.company}</span>
-                    <span style={{...entryBold, flex: 1, textAlign: "center"}}>{c.title}</span>
-                    <span style={{...entryBold, fontSize: "8.5pt"}}>{c.startDate} — {c.endDate}</span>
+                  <div style={{...entryRow, gap: "16px"}}>
+                    <span style={{...entryBold, minWidth: "120px"}}>{c.company}</span>
+                    <span style={{...entryBold, flex: 1, textAlign: "center", minWidth: "0"}}>{c.title}</span>
+                    <span style={{...entryBold, fontSize: "8.5pt", whiteSpace: "nowrap"}}>{c.startDate} — {c.endDate}</span>
                   </div>
                   {getDesc(c.id, c.descriptions).length > 0 && (
                     <ol style={numList}>
@@ -171,10 +174,10 @@ const ResumePrint = React.forwardRef<HTMLDivElement, ResumePrintProps>(
               <div style={sectionTitle}>{getTitle("project", "项目经历")}</div>
               {projects.map((p) => (
                 <div key={p.id} style={entryWrap}>
-                  <div style={entryRow}>
-                    <span style={entryBold}>{p.name}</span>
-                    <span style={{...entryBold, flex: 1, textAlign: "center"}}>{p.role || "核心成员"}</span>
-                    <span style={{...entryBold, fontSize: "8.5pt"}}>{p.startDate} — {p.endDate}</span>
+                  <div style={{...entryRow, gap: "16px"}}>
+                    <span style={{...entryBold, minWidth: "120px"}}>{p.name}</span>
+                    <span style={{...entryBold, flex: 1, textAlign: "center", minWidth: "0"}}>{p.role || "核心成员"}</span>
+                    <span style={{...entryBold, fontSize: "8.5pt", whiteSpace: "nowrap"}}>{p.startDate} — {p.endDate}</span>
                   </div>
                   {p.techStack.length > 0 && (
                     <div style={{ ...entrySub, marginBottom: "2px" }}>

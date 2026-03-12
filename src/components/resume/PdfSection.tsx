@@ -31,11 +31,13 @@ export function PdfDownloadButton({
   tailored,
   documentTitle,
   onExport,
+  useOriginalIds,
 }: {
   resume: ResumeData;
   tailored?: TailoredResume | null;
   documentTitle?: string;
   onExport?: () => void;
+  useOriginalIds?: string[];
 }) {
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -50,7 +52,7 @@ export function PdfDownloadButton({
     <>
       {/* Hidden print target */}
       <div style={{ display: "none" }}>
-        <ResumePrint ref={contentRef} resume={resume} tailored={tailored} />
+        <ResumePrint ref={contentRef} resume={resume} tailored={tailored} useOriginalIds={useOriginalIds} />
       </div>
 
       <Button onClick={() => handlePrint()}>
@@ -68,11 +70,13 @@ export function PdfPreviewPanel({
   tailored,
   documentTitle,
   onExport,
+  useOriginalIds,
 }: {
   resume: ResumeData;
   tailored?: TailoredResume | null;
   documentTitle?: string;
   onExport?: () => void;
+  useOriginalIds?: string[];
 }) {
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -115,7 +119,7 @@ export function PdfPreviewPanel({
               boxShadow: "0 2px 16px rgba(0,0,0,0.15)",
             }}
           >
-            <ResumePrint ref={contentRef} resume={resume} tailored={tailored} />
+            <ResumePrint ref={contentRef} resume={resume} tailored={tailored} useOriginalIds={useOriginalIds} />
           </div>
         </div>
       </CardContent>

@@ -398,7 +398,7 @@ const pageRoot: React.CSSProperties = {
   color: "#1a1a1a",
   lineHeight: 1.25,
   letterSpacing: "-0.02em",
-  padding: "5mm 5mm 5mm 5mm",
+  padding: "6mm 5mm 6mm 5mm",
   maxWidth: "210mm",
   margin: "0 auto",
   backgroundColor: "#fff",

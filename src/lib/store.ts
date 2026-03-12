@@ -59,6 +59,12 @@ interface ResumeStore {
   updateProject: (id: string, project: Partial<Project>) => void;
   removeProject: (id: string) => void;
 
+  // 新增：仅更新岗位版本的预览编辑，不影响简历库
+  updateTailoredPreviewWork: (tailoredId: string, workId: string, work: Partial<WorkExperience>) => void;
+  updateTailoredPreviewCampus: (tailoredId: string, campusId: string, campus: Partial<WorkExperience>) => void;
+  updateTailoredPreviewProject: (tailoredId: string, projectId: string, project: Partial<Project>) => void;
+  removeProject: (id: string) => void;
+
   addSkill: (skill: Skill) => void;
   updateSkill: (id: string, skill: Partial<Skill>) => void;
   removeSkill: (id: string) => void;
@@ -221,14 +227,35 @@ export const useResumeStore = create<ResumeStore>()(
           resume: { ...s.resume, work: [...s.resume.work, work] },
         })),
       updateWork: (id, work) =>
-        set((s) => ({
-          resume: {
+        set((s) => {
+          // 更新简历库中的工作经历
+          const updatedResume = {
             ...s.resume,
             work: s.resume.work.map((w) =>
               w.id === id ? { ...w, ...work } : w
             ),
-          },
-        })),
+          };
+
+          // 清除所有岗位版本中该项的 previewEdits，因为简历库是最高优先级
+          const updatedTailoredResumes = s.tailoredResumes.map((tr) => {
+            if (tr.previewEdits?.work?.[id]) {
+              const { [id]: removed, ...restWork } = tr.previewEdits.work;
+              return {
+                ...tr,
+                previewEdits: {
+                  ...tr.previewEdits,
+                  work: restWork,
+                },
+              };
+            }
+            return tr;
+          });
+
+          return {
+            resume: updatedResume,
+            tailoredResumes: updatedTailoredResumes,
+          };
+        }),
       removeWork: (id) =>
         set((s) => ({
           resume: { ...s.resume, work: s.resume.work.filter((w) => w.id !== id) },
@@ -239,14 +266,35 @@ export const useResumeStore = create<ResumeStore>()(
           resume: { ...s.resume, campus: [...(s.resume.campus || []), campus] },
         })),
       updateCampus: (id, campus) =>
-        set((s) => ({
-          resume: {
+        set((s) => {
+          // 更新简历库中的校园经历
+          const updatedResume = {
             ...s.resume,
             campus: (s.resume.campus || []).map((c) =>
               c.id === id ? { ...c, ...campus } : c
             ),
-          },
-        })),
+          };
+
+          // 清除所有岗位版本中该项的 previewEdits
+          const updatedTailoredResumes = s.tailoredResumes.map((tr) => {
+            if (tr.previewEdits?.campus?.[id]) {
+              const { [id]: removed, ...restCampus } = tr.previewEdits.campus;
+              return {
+                ...tr,
+                previewEdits: {
+                  ...tr.previewEdits,
+                  campus: restCampus,
+                },
+              };
+            }
+            return tr;
+          });
+
+          return {
+            resume: updatedResume,
+            tailoredResumes: updatedTailoredResumes,
+          };
+        }),
       removeCampus: (id) =>
         set((s) => ({
           resume: { ...s.resume, campus: (s.resume.campus || []).filter((c) => c.id !== id) },
@@ -257,14 +305,35 @@ export const useResumeStore = create<ResumeStore>()(
           resume: { ...s.resume, projects: [...s.resume.projects, project] },
         })),
       updateProject: (id, project) =>
-        set((s) => ({
-          resume: {
+        set((s) => {
+          // 更新简历库中的项目经历
+          const updatedResume = {
             ...s.resume,
             projects: s.resume.projects.map((p) =>
               p.id === id ? { ...p, ...project } : p
             ),
-          },
-        })),
+          };
+
+          // 清除所有岗位版本中该项的 previewEdits
+          const updatedTailoredResumes = s.tailoredResumes.map((tr) => {
+            if (tr.previewEdits?.projects?.[id]) {
+              const { [id]: removed, ...restProjects } = tr.previewEdits.projects;
+              return {
+                ...tr,
+                previewEdits: {
+                  ...tr.previewEdits,
+                  projects: restProjects,
+                },
+              };
+            }
+            return tr;
+          });
+
+          return {
+            resume: updatedResume,
+            tailoredResumes: updatedTailoredResumes,
+          };
+        }),
       removeProject: (id) =>
         set((s) => ({
           resume: {
@@ -435,6 +504,7 @@ export const useResumeStore = create<ResumeStore>()(
           polishedDescriptions: {},
           optimizedSkills: {},
           useOriginalIds: [],
+          previewEdits: {},
         };
         set((s) => ({
           tailoredResumes: [...s.tailoredResumes, tailored],
@@ -449,6 +519,70 @@ export const useResumeStore = create<ResumeStore>()(
           ),
         })),
       setCurrentTailored: (id) => set({ currentTailoredId: id }),
+
+      // 新增：仅更新岗位版本的预览编辑，不影响简历库
+      updateTailoredPreviewWork: (tailoredId, workId, work) =>
+        set((s) => ({
+          tailoredResumes: s.tailoredResumes.map((t) =>
+            t.id === tailoredId
+              ? {
+                  ...t,
+                  previewEdits: {
+                    ...t.previewEdits,
+                    work: {
+                      ...t.previewEdits?.work,
+                      [workId]: {
+                        ...t.previewEdits?.work?.[workId],
+                        ...work,
+                      },
+                    },
+                  },
+                }
+              : t
+          ),
+        })),
+
+      updateTailoredPreviewCampus: (tailoredId, campusId, campus) =>
+        set((s) => ({
+          tailoredResumes: s.tailoredResumes.map((t) =>
+            t.id === tailoredId
+              ? {
+                  ...t,
+                  previewEdits: {
+                    ...t.previewEdits,
+                    campus: {
+                      ...t.previewEdits?.campus,
+                      [campusId]: {
+                        ...t.previewEdits?.campus?.[campusId],
+                        ...campus,
+                      },
+                    },
+                  },
+                }
+              : t
+          ),
+        })),
+
+      updateTailoredPreviewProject: (tailoredId, projectId, project) =>
+        set((s) => ({
+          tailoredResumes: s.tailoredResumes.map((t) =>
+            t.id === tailoredId
+              ? {
+                  ...t,
+                  previewEdits: {
+                    ...t.previewEdits,
+                    projects: {
+                      ...t.previewEdits?.projects,
+                      [projectId]: {
+                        ...t.previewEdits?.projects?.[projectId],
+                        ...project,
+                      },
+                    },
+                  },
+                }
+              : t
+          ),
+        })),
 
       setOptimizePrompt: (key, value) =>
         set((s) => ({
@@ -485,7 +619,7 @@ export const useResumeStore = create<ResumeStore>()(
     {
       name: "resume-store",
       skipHydration: true,
-      version: 12,
+      version: 13,
       migrate: (persistedState: any, version: number) => {
         if (version < 6) {
           return { ...persistedState, optimizePrompts: DEFAULT_PROMPTS };

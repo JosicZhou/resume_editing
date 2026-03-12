@@ -8,6 +8,7 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Textarea from "@/components/ui/Textarea";
 import Badge from "@/components/ui/Badge";
+import type { WorkExperience, Project } from "@/lib/types";
 import {
   Eye,
   Edit3,
@@ -144,10 +145,11 @@ export default function PreviewPage() {
   const setCurrentTailored = useResumeStore((s) => s.setCurrentTailored);
   const removeJob = useResumeStore((s) => s.removeJob);
   const addExportRecord = useResumeStore((s) => s.addExportRecord);
-  const updateWork = useResumeStore((s) => s.updateWork);
-  const updateCampus = useResumeStore((s) => s.updateCampus);
-  const updateProject = useResumeStore((s) => s.updateProject);
   const updateTailoredResume = useResumeStore((s) => s.updateTailoredResume);
+  // 使用新的方法：只更新岗位版本，不影响简历库
+  const updateTailoredPreviewWork = useResumeStore((s) => s.updateTailoredPreviewWork);
+  const updateTailoredPreviewCampus = useResumeStore((s) => s.updateTailoredPreviewCampus);
+  const updateTailoredPreviewProject = useResumeStore((s) => s.updateTailoredPreviewProject);
 
   const [showPdf, setShowPdf] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -212,22 +214,38 @@ export default function PreviewPage() {
       : raw;
   };
 
+  // 获取合并后的数据：previewEdits > resume
+  const getMergedWork = (w: WorkExperience) => {
+    if (!currentTailored?.previewEdits?.work?.[w.id]) return w;
+    return { ...w, ...currentTailored.previewEdits.work[w.id] };
+  };
+
+  const getMergedCampus = (c: WorkExperience) => {
+    if (!currentTailored?.previewEdits?.campus?.[c.id]) return c;
+    return { ...c, ...currentTailored.previewEdits.campus[c.id] };
+  };
+
+  const getMergedProject = (p: Project) => {
+    if (!currentTailored?.previewEdits?.projects?.[p.id]) return p;
+    return { ...p, ...currentTailored.previewEdits.projects[p.id] };
+  };
+
   const work = currentTailored
     ? resume.work.filter((w) =>
         currentTailored.selectedWorkIds.includes(w.id)
-      )
+      ).map(getMergedWork)
     : resume.work;
 
   const projects = currentTailored
     ? resume.projects.filter((p) =>
         currentTailored.selectedProjectIds.includes(p.id)
-      )
+      ).map(getMergedProject)
     : resume.projects;
 
   const campus = currentTailored
     ? (resume.campus || []).filter((c) =>
         (currentTailored.selectedCampusIds || []).includes(c.id)
-      )
+      ).map(getMergedCampus)
     : resume.campus || [];
 
   const education = currentTailored
@@ -474,20 +492,32 @@ export default function PreviewPage() {
                           <div className="font-medium text-sm flex items-center gap-1 flex-wrap">
                             <EditableText
                               value={w.company}
-                              onChange={(company) => updateWork(w.id, { company })}
+                              onChange={(company) => {
+                                if (currentTailored) {
+                                  updateTailoredPreviewWork(currentTailored.id, w.id, { company });
+                                }
+                              }}
                               className="font-medium"
                             />
                             <span>·</span>
                             <EditableText
                               value={w.title}
-                              onChange={(title) => updateWork(w.id, { title })}
+                              onChange={(title) => {
+                                if (currentTailored) {
+                                  updateTailoredPreviewWork(currentTailored.id, w.id, { title });
+                                }
+                              }}
                               className="font-medium"
                             />
                           </div>
                           <div className="text-xs text-muted-foreground mt-0.5">
                             <EditableText
                               value={w.location || ""}
-                              onChange={(location) => updateWork(w.id, { location })}
+                              onChange={(location) => {
+                                if (currentTailored) {
+                                  updateTailoredPreviewWork(currentTailored.id, w.id, { location });
+                                }
+                              }}
                               className="text-xs"
                             />
                           </div>
@@ -496,13 +526,21 @@ export default function PreviewPage() {
                           <div className="text-xs text-muted-foreground flex items-center gap-1">
                             <EditableText
                               value={w.startDate}
-                              onChange={(startDate) => updateWork(w.id, { startDate })}
+                              onChange={(startDate) => {
+                                if (currentTailored) {
+                                  updateTailoredPreviewWork(currentTailored.id, w.id, { startDate });
+                                }
+                              }}
                               className="text-xs"
                             />
                             <span>-</span>
                             <EditableText
                               value={w.endDate}
-                              onChange={(endDate) => updateWork(w.id, { endDate })}
+                              onChange={(endDate) => {
+                                if (currentTailored) {
+                                  updateTailoredPreviewWork(currentTailored.id, w.id, { endDate });
+                                }
+                              }}
                               className="text-xs"
                             />
                           </div>
@@ -520,9 +558,11 @@ export default function PreviewPage() {
                       </div>
                       <EditableDescriptionList
                         items={getDesc(w.id, w.descriptions)}
-                        onChange={(descriptions) =>
-                          updateWork(w.id, { descriptions })
-                        }
+                        onChange={(descriptions) => {
+                          if (currentTailored) {
+                            updateTailoredPreviewWork(currentTailored.id, w.id, { descriptions });
+                          }
+                        }}
                       />
                     </div>
                     );
@@ -562,20 +602,32 @@ export default function PreviewPage() {
                           <div className="font-medium text-sm flex items-center gap-1 flex-wrap">
                             <EditableText
                               value={c.company}
-                              onChange={(company) => updateCampus(c.id, { company })}
+                              onChange={(company) => {
+                                if (currentTailored) {
+                                  updateTailoredPreviewCampus(currentTailored.id, c.id, { company });
+                                }
+                              }}
                               className="font-medium"
                             />
                             <span>·</span>
                             <EditableText
                               value={c.title}
-                              onChange={(title) => updateCampus(c.id, { title })}
+                              onChange={(title) => {
+                                if (currentTailored) {
+                                  updateTailoredPreviewCampus(currentTailored.id, c.id, { title });
+                                }
+                              }}
                               className="font-medium"
                             />
                           </div>
                           <div className="text-xs text-muted-foreground mt-0.5">
                             <EditableText
                               value={c.location || ""}
-                              onChange={(location) => updateCampus(c.id, { location })}
+                              onChange={(location) => {
+                                if (currentTailored) {
+                                  updateTailoredPreviewCampus(currentTailored.id, c.id, { location });
+                                }
+                              }}
                               className="text-xs"
                             />
                           </div>
@@ -584,13 +636,21 @@ export default function PreviewPage() {
                           <div className="text-xs text-muted-foreground flex items-center gap-1">
                             <EditableText
                               value={c.startDate}
-                              onChange={(startDate) => updateCampus(c.id, { startDate })}
+                              onChange={(startDate) => {
+                                if (currentTailored) {
+                                  updateTailoredPreviewCampus(currentTailored.id, c.id, { startDate });
+                                }
+                              }}
                               className="text-xs"
                             />
                             <span>-</span>
                             <EditableText
                               value={c.endDate}
-                              onChange={(endDate) => updateCampus(c.id, { endDate })}
+                              onChange={(endDate) => {
+                                if (currentTailored) {
+                                  updateTailoredPreviewCampus(currentTailored.id, c.id, { endDate });
+                                }
+                              }}
                               className="text-xs"
                             />
                           </div>
@@ -608,9 +668,11 @@ export default function PreviewPage() {
                       </div>
                       <EditableDescriptionList
                         items={getDesc(c.id, c.descriptions)}
-                        onChange={(descriptions) =>
-                          updateCampus(c.id, { descriptions })
-                        }
+                        onChange={(descriptions) => {
+                          if (currentTailored) {
+                            updateTailoredPreviewCampus(currentTailored.id, c.id, { descriptions });
+                          }
+                        }}
                       />
                     </div>
                     );
@@ -653,13 +715,21 @@ export default function PreviewPage() {
                           <div className="font-medium text-sm flex items-center gap-1 flex-wrap">
                             <EditableText
                               value={p.name}
-                              onChange={(name) => updateProject(p.id, { name })}
+                              onChange={(name) => {
+                                if (currentTailored) {
+                                  updateTailoredPreviewProject(currentTailored.id, p.id, { name });
+                                }
+                              }}
                               className="font-medium"
                             />
                             <span>·</span>
                             <EditableText
                               value={p.role || ""}
-                              onChange={(role) => updateProject(p.id, { role })}
+                              onChange={(role) => {
+                                if (currentTailored) {
+                                  updateTailoredPreviewProject(currentTailored.id, p.id, { role });
+                                }
+                              }}
                               className="font-medium"
                             />
                           </div>
@@ -673,9 +743,13 @@ export default function PreviewPage() {
                                 >
                                   {tech}
                                   <button
-                                    onClick={() => updateProject(p.id, {
-                                      techStack: p.techStack.filter((_, i) => i !== idx)
-                                    })}
+                                    onClick={() => {
+                                      if (currentTailored) {
+                                        updateTailoredPreviewProject(currentTailored.id, p.id, {
+                                          techStack: p.techStack.filter((_, i) => i !== idx)
+                                        });
+                                      }
+                                    }}
                                     className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-opacity"
                                   >
                                     <X className="w-2.5 h-2.5" />
@@ -689,13 +763,21 @@ export default function PreviewPage() {
                           <div className="text-xs text-muted-foreground flex items-center gap-1">
                             <EditableText
                               value={p.startDate}
-                              onChange={(startDate) => updateProject(p.id, { startDate })}
+                              onChange={(startDate) => {
+                                if (currentTailored) {
+                                  updateTailoredPreviewProject(currentTailored.id, p.id, { startDate });
+                                }
+                              }}
                               className="text-xs"
                             />
                             <span>-</span>
                             <EditableText
                               value={p.endDate}
-                              onChange={(endDate) => updateProject(p.id, { endDate })}
+                              onChange={(endDate) => {
+                                if (currentTailored) {
+                                  updateTailoredPreviewProject(currentTailored.id, p.id, { endDate });
+                                }
+                              }}
                               className="text-xs"
                             />
                           </div>
@@ -713,9 +795,11 @@ export default function PreviewPage() {
                       </div>
                       <EditableDescriptionList
                         items={getDesc(p.id, p.descriptions)}
-                        onChange={(descriptions) =>
-                          updateProject(p.id, { descriptions })
-                        }
+                        onChange={(descriptions) => {
+                          if (currentTailored) {
+                            updateTailoredPreviewProject(currentTailored.id, p.id, { descriptions });
+                          }
+                        }}
                       />
                     </div>
                     );

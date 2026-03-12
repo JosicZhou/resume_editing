@@ -126,10 +126,10 @@ const ResumePrint = React.forwardRef<HTMLDivElement, ResumePrintProps>(
               <div style={sectionTitle}>{getTitle("work", "工作/实习经历")}</div>
               {work.map((w) => (
                 <div key={w.id} style={entryWrap}>
-                  <div style={{...entryRow, gap: "16px"}}>
-                    <span style={{...entryBold, minWidth: "120px"}}>{w.company}</span>
-                    <span style={{...entryBold, flex: 1, textAlign: "center", minWidth: "0"}}>{w.title}</span>
-                    <span style={{...entryBold, fontSize: "8.5pt", whiteSpace: "nowrap"}}>{w.startDate} — {w.endDate}</span>
+                  <div style={{display: "flex", alignItems: "baseline", gap: "8px"}}>
+                    <span style={{...entryBold, flex: 1, minWidth: "0"}}>{w.company}</span>
+                    <span style={{...entryBold, width: "180px", flexShrink: 0, marginRight: "100px"}}>{w.title}</span>
+                    <span style={{...entryBold, fontSize: "8.5pt", whiteSpace: "nowrap", position: "absolute", right: "12mm"}}>{w.startDate} — {w.endDate}</span>
                   </div>
                   {getDesc(w.id, w.descriptions).length > 0 && (
                     <ol style={numList}>
@@ -150,10 +150,10 @@ const ResumePrint = React.forwardRef<HTMLDivElement, ResumePrintProps>(
               <div style={sectionTitle}>{getTitle("campus", "校园经历")}</div>
               {campus.map((c) => (
                 <div key={c.id} style={entryWrap}>
-                  <div style={{...entryRow, gap: "16px"}}>
-                    <span style={{...entryBold, minWidth: "120px"}}>{c.company}</span>
-                    <span style={{...entryBold, flex: 1, textAlign: "center", minWidth: "0"}}>{c.title}</span>
-                    <span style={{...entryBold, fontSize: "8.5pt", whiteSpace: "nowrap"}}>{c.startDate} — {c.endDate}</span>
+                  <div style={{display: "flex", alignItems: "baseline", gap: "8px"}}>
+                    <span style={{...entryBold, flex: 1, minWidth: "0"}}>{c.company}</span>
+                    <span style={{...entryBold, width: "180px", flexShrink: 0, marginRight: "100px"}}>{c.title}</span>
+                    <span style={{...entryBold, fontSize: "8.5pt", whiteSpace: "nowrap", position: "absolute", right: "12mm"}}>{c.startDate} — {c.endDate}</span>
                   </div>
                   {getDesc(c.id, c.descriptions).length > 0 && (
                     <ol style={numList}>
@@ -174,10 +174,10 @@ const ResumePrint = React.forwardRef<HTMLDivElement, ResumePrintProps>(
               <div style={sectionTitle}>{getTitle("project", "项目经历")}</div>
               {projects.map((p) => (
                 <div key={p.id} style={entryWrap}>
-                  <div style={{...entryRow, gap: "16px"}}>
-                    <span style={{...entryBold, minWidth: "120px"}}>{p.name}</span>
-                    <span style={{...entryBold, flex: 1, textAlign: "center", minWidth: "0"}}>{p.role || "核心成员"}</span>
-                    <span style={{...entryBold, fontSize: "8.5pt", whiteSpace: "nowrap"}}>{p.startDate} — {p.endDate}</span>
+                  <div style={{display: "flex", alignItems: "baseline", gap: "8px"}}>
+                    <span style={{...entryBold, flex: 1, minWidth: "0"}}>{p.name}</span>
+                    <span style={{...entryBold, width: "180px", flexShrink: 0, marginRight: "100px"}}>{p.role || "核心成员"}</span>
+                    <span style={{...entryBold, fontSize: "8.5pt", whiteSpace: "nowrap", position: "absolute", right: "12mm"}}>{p.startDate} — {p.endDate}</span>
                   </div>
                   {p.techStack.length > 0 && (
                     <div style={{ ...entrySub, marginBottom: "2px" }}>
@@ -352,16 +352,13 @@ const ResumePrint = React.forwardRef<HTMLDivElement, ResumePrintProps>(
 
             {/* 右：作品集/个人网站图片（大图 + 标签） */}
             {(() => {
+              // 只显示用户选择的 section
+              const selectedSectionIds = tailored?.selectedCustomSectionIds || [];
               const portfolioSections = (resume.customSections || []).filter(
-                (sec) => sec.title === "作品集" || sec.title === "个人网站"
+                (sec) => (sec.title === "作品集" || sec.title === "个人网站") &&
+                         (!tailored || selectedSectionIds.includes(sec.id))
               );
-              // 优先查找"作品集"，如果没有再找"个人网站"
-              const sortedSections = portfolioSections.sort((a, b) => {
-                if (a.title === "作品集" && b.title === "个人网站") return -1;
-                if (a.title === "个人网站" && b.title === "作品集") return 1;
-                return 0;
-              });
-              const firstPortfolio = sortedSections
+              const firstPortfolio = portfolioSections
                 .flatMap((sec) => sec.items.map((item) => ({ ...item, sectionTitle: sec.title })))
                 .find((item) => item.imageUrl);
               if (!firstPortfolio) return null;
@@ -399,8 +396,9 @@ const pageRoot: React.CSSProperties = {
   fontFamily: FONT_FAMILY,
   fontSize: "9pt",
   color: "#1a1a1a",
-  lineHeight: 1.3,
-  padding: "8mm 12mm 10mm 12mm",
+  lineHeight: 1.25,
+  letterSpacing: "-0.02em",
+  padding: "5mm 5mm 5mm 5mm",
   maxWidth: "210mm",
   margin: "0 auto",
   backgroundColor: "#fff",
@@ -555,20 +553,20 @@ const bulletList: React.CSSProperties = {
 
 const bulletItem: React.CSSProperties = {
   fontSize: "9pt",
-  lineHeight: 1.45,
-  marginBottom: "2px",
+  lineHeight: 1.35,
+  marginBottom: "1px",
   color: "#1a1a1a",
 };
 
 const numList: React.CSSProperties = {
   paddingLeft: "18px",
-  margin: "3px 0 0 0",
+  margin: "2px 0 0 0",
   listStyleType: "decimal",
 };
 
 const numItem: React.CSSProperties = {
   fontSize: "9pt",
-  lineHeight: 1.45,
-  marginBottom: "2px",
+  lineHeight: 1.35,
+  marginBottom: "1px",
   color: "#1a1a1a",
 };

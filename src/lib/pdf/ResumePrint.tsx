@@ -125,11 +125,8 @@ const ResumePrint = React.forwardRef<HTMLDivElement, ResumePrintProps>(
                 <div key={w.id} style={entryWrap}>
                   <div style={entryRow}>
                     <span style={entryBold}>{w.company}</span>
-                    <span style={entryDate}>{w.startDate} — {w.endDate}</span>
-                  </div>
-                  <div style={entryRow}>
-                    <span style={entrySub}>{w.title}</span>
-                    {w.location && <span style={entryLocation}>{w.location}</span>}
+                    <span style={{...entryBold, flex: 1, textAlign: "center"}}>{w.title}</span>
+                    <span style={{...entryBold, fontSize: "8.5pt"}}>{w.startDate} — {w.endDate}</span>
                   </div>
                   {getDesc(w.id, w.descriptions).length > 0 && (
                     <ol style={numList}>
@@ -152,11 +149,8 @@ const ResumePrint = React.forwardRef<HTMLDivElement, ResumePrintProps>(
                 <div key={c.id} style={entryWrap}>
                   <div style={entryRow}>
                     <span style={entryBold}>{c.company}</span>
-                    <span style={entryDate}>{c.startDate} — {c.endDate}</span>
-                  </div>
-                  <div style={entryRow}>
-                    <span style={entrySub}>{c.title}</span>
-                    {c.location && <span style={entryLocation}>{c.location}</span>}
+                    <span style={{...entryBold, flex: 1, textAlign: "center"}}>{c.title}</span>
+                    <span style={{...entryBold, fontSize: "8.5pt"}}>{c.startDate} — {c.endDate}</span>
                   </div>
                   {getDesc(c.id, c.descriptions).length > 0 && (
                     <ol style={numList}>
@@ -179,14 +173,9 @@ const ResumePrint = React.forwardRef<HTMLDivElement, ResumePrintProps>(
                 <div key={p.id} style={entryWrap}>
                   <div style={entryRow}>
                     <span style={entryBold}>{p.name}</span>
-                    <span style={entryDate}>{p.startDate} — {p.endDate}</span>
+                    <span style={{...entryBold, flex: 1, textAlign: "center"}}>{p.role || "核心成员"}</span>
+                    <span style={{...entryBold, fontSize: "8.5pt"}}>{p.startDate} — {p.endDate}</span>
                   </div>
-                  {(p.role || p.location) && (
-                    <div style={entryRow}>
-                      {p.role && <span style={entrySub}>{p.role}</span>}
-                      {p.location && <span style={entryLocation}>{p.location}</span>}
-                    </div>
-                  )}
                   {p.techStack.length > 0 && (
                     <div style={{ ...entrySub, marginBottom: "2px" }}>
                       技术栈：{p.techStack.join(" · ")}

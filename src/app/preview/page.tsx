@@ -32,6 +32,57 @@ const PdfPreviewPanel = dynamic(
   { ssr: false }
 );
 
+function EditableText({
+  value,
+  onChange,
+  className = "",
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  className?: string;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+
+  useEffect(() => {
+    setDraft(value);
+  }, [value]);
+
+  if (editing) {
+    return (
+      <Input
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={() => {
+          onChange(draft);
+          setEditing(false);
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            onChange(draft);
+            setEditing(false);
+          }
+          if (e.key === "Escape") {
+            setDraft(value);
+            setEditing(false);
+          }
+        }}
+        autoFocus
+        className={className}
+      />
+    );
+  }
+
+  return (
+    <span
+      onClick={() => setEditing(true)}
+      className={`cursor-pointer hover:bg-accent/50 rounded px-1 ${className}`}
+    >
+      {value || "点击编辑"}
+    </span>
+  );
+}
+
 function EditableDescriptionList({
   items,
   onChange,
@@ -416,21 +467,43 @@ export default function PreviewPage() {
                       key={w.id}
                       className="border-l-2 border-primary/30 pl-3"
                     >
-                      <div className="flex justify-between mb-1">
-                        <div>
-                          <p className="font-medium text-sm">
-                            {w.company} · {w.title}
-                          </p>
-                          {w.location && (
-                            <p className="text-xs text-muted-foreground">
-                              {w.location}
-                            </p>
-                          )}
+                      <div className="flex justify-between mb-1 gap-2">
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-sm flex items-center gap-1 flex-wrap">
+                            <EditableText
+                              value={w.company}
+                              onChange={(company) => updateWork(w.id, { company })}
+                              className="font-medium"
+                            />
+                            <span>·</span>
+                            <EditableText
+                              value={w.title}
+                              onChange={(title) => updateWork(w.id, { title })}
+                              className="font-medium"
+                            />
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-0.5">
+                            <EditableText
+                              value={w.location || ""}
+                              onChange={(location) => updateWork(w.id, { location })}
+                              className="text-xs"
+                            />
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-muted-foreground">
-                            {w.startDate} - {w.endDate}
-                          </span>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <div className="text-xs text-muted-foreground flex items-center gap-1">
+                            <EditableText
+                              value={w.startDate}
+                              onChange={(startDate) => updateWork(w.id, { startDate })}
+                              className="text-xs"
+                            />
+                            <span>-</span>
+                            <EditableText
+                              value={w.endDate}
+                              onChange={(endDate) => updateWork(w.id, { endDate })}
+                              className="text-xs"
+                            />
+                          </div>
                           {hasOptimized && (
                             <Button
                               variant={isUsingOriginal ? "primary" : "outline"}
@@ -482,19 +555,43 @@ export default function PreviewPage() {
                     const isUsingOriginal = useOriginalIds.has(c.id);
                     return (
                     <div key={c.id} className="border-l-2 border-primary/30 pl-3">
-                      <div className="flex justify-between mb-1">
-                        <div>
-                          <p className="font-medium text-sm">
-                            {c.company} · {c.title}
-                          </p>
-                          {c.location && (
-                            <p className="text-xs text-muted-foreground">{c.location}</p>
-                          )}
+                      <div className="flex justify-between mb-1 gap-2">
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-sm flex items-center gap-1 flex-wrap">
+                            <EditableText
+                              value={c.company}
+                              onChange={(company) => updateCampus(c.id, { company })}
+                              className="font-medium"
+                            />
+                            <span>·</span>
+                            <EditableText
+                              value={c.title}
+                              onChange={(title) => updateCampus(c.id, { title })}
+                              className="font-medium"
+                            />
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-0.5">
+                            <EditableText
+                              value={c.location || ""}
+                              onChange={(location) => updateCampus(c.id, { location })}
+                              className="text-xs"
+                            />
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-muted-foreground">
-                            {c.startDate} - {c.endDate}
-                          </span>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <div className="text-xs text-muted-foreground flex items-center gap-1">
+                            <EditableText
+                              value={c.startDate}
+                              onChange={(startDate) => updateCampus(c.id, { startDate })}
+                              className="text-xs"
+                            />
+                            <span>-</span>
+                            <EditableText
+                              value={c.endDate}
+                              onChange={(endDate) => updateCampus(c.id, { endDate })}
+                              className="text-xs"
+                            />
+                          </div>
                           {hasOptimized && (
                             <Button
                               variant={isUsingOriginal ? "primary" : "outline"}
@@ -549,22 +646,57 @@ export default function PreviewPage() {
                       key={p.id}
                       className="border-l-2 border-primary/30 pl-3"
                     >
-                      <div className="flex justify-between mb-1">
-                        <div>
-                          <p className="font-medium text-sm">
-                            {p.name}
-                            {p.role ? ` · ${p.role}` : ""}
-                          </p>
+                      <div className="flex justify-between mb-1 gap-2">
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-sm flex items-center gap-1 flex-wrap">
+                            <EditableText
+                              value={p.name}
+                              onChange={(name) => updateProject(p.id, { name })}
+                              className="font-medium"
+                            />
+                            <span>·</span>
+                            <EditableText
+                              value={p.role || ""}
+                              onChange={(role) => updateProject(p.id, { role })}
+                              className="font-medium"
+                            />
+                          </div>
+                          {/* 技术栈：可删除 */}
                           {p.techStack.length > 0 && (
-                            <p className="text-xs text-muted-foreground">
-                              {p.techStack.join(", ")}
-                            </p>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {p.techStack.map((tech, idx) => (
+                                <span
+                                  key={idx}
+                                  className="inline-flex items-center gap-0.5 text-xs bg-muted px-1.5 py-0.5 rounded group"
+                                >
+                                  {tech}
+                                  <button
+                                    onClick={() => updateProject(p.id, {
+                                      techStack: p.techStack.filter((_, i) => i !== idx)
+                                    })}
+                                    className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-opacity"
+                                  >
+                                    <X className="w-2.5 h-2.5" />
+                                  </button>
+                                </span>
+                              ))}
+                            </div>
                           )}
                         </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-muted-foreground">
-                            {p.startDate} - {p.endDate}
-                          </span>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <div className="text-xs text-muted-foreground flex items-center gap-1">
+                            <EditableText
+                              value={p.startDate}
+                              onChange={(startDate) => updateProject(p.id, { startDate })}
+                              className="text-xs"
+                            />
+                            <span>-</span>
+                            <EditableText
+                              value={p.endDate}
+                              onChange={(endDate) => updateProject(p.id, { endDate })}
+                              className="text-xs"
+                            />
+                          </div>
                           {hasOptimized && (
                             <Button
                               variant={isUsingOriginal ? "primary" : "outline"}

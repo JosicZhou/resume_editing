@@ -95,6 +95,7 @@ export default function PreviewPage() {
   const updateWork = useResumeStore((s) => s.updateWork);
   const updateCampus = useResumeStore((s) => s.updateCampus);
   const updateProject = useResumeStore((s) => s.updateProject);
+  const updateTailoredResume = useResumeStore((s) => s.updateTailoredResume);
 
   const [showPdf, setShowPdf] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -114,6 +115,15 @@ export default function PreviewPage() {
 
   const currentJob = jobs.find((j) => j.id === currentJobId);
 
+  // Sync useOriginalIds from currentTailored when it changes
+  useEffect(() => {
+    if (currentTailored?.useOriginalIds) {
+      setUseOriginalIds(new Set(currentTailored.useOriginalIds));
+    } else {
+      setUseOriginalIds(new Set());
+    }
+  }, [currentTailored?.id, currentTailored?.useOriginalIds]);
+
   const handleExport = useCallback(() => {
     addExportRecord({
       jobTitle: currentJob?.title || "",
@@ -128,6 +138,14 @@ export default function PreviewPage() {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
+
+      // Sync to store
+      if (currentTailored) {
+        updateTailoredResume(currentTailored.id, {
+          useOriginalIds: Array.from(next),
+        });
+      }
+
       return next;
     });
   };

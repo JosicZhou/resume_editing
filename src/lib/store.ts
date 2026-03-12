@@ -434,6 +434,7 @@ export const useResumeStore = create<ResumeStore>()(
           rewrittenDescriptions: {},
           polishedDescriptions: {},
           optimizedSkills: {},
+          useOriginalIds: [],
         };
         set((s) => ({
           tailoredResumes: [...s.tailoredResumes, tailored],
@@ -484,7 +485,7 @@ export const useResumeStore = create<ResumeStore>()(
     {
       name: "resume-store",
       skipHydration: true,
-      version: 11,
+      version: 12,
       migrate: (persistedState: any, version: number) => {
         if (version < 6) {
           return { ...persistedState, optimizePrompts: DEFAULT_PROMPTS };
@@ -550,6 +551,16 @@ export const useResumeStore = create<ResumeStore>()(
           return {
             ...state,
             exportHistory: state.exportHistory || [],
+          };
+        }
+        if (version < 12) {
+          const state = persistedState as any;
+          return {
+            ...state,
+            tailoredResumes: (state.tailoredResumes || []).map((t: any) => ({
+              ...t,
+              useOriginalIds: t.useOriginalIds || [],
+            })),
           };
         }
         return persistedState;

@@ -134,6 +134,7 @@ export interface TailoredResume {
   selectedAwardIds: string[];
   selectedSkillIds: string[];
   selectedCustomSectionIds: string[];
+  useOriginalIds: string[]; // IDs of work/project/campus that user chose to use original version
 }
 
 export interface JdAnalysisResult {

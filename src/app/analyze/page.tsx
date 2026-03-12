@@ -37,6 +37,7 @@ export default function AnalyzePage() {
   const [showAddJob, setShowAddJob] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [analyzeError, setAnalyzeError] = useState<string | null>(null);
+  const [hoveredJobId, setHoveredJobId] = useState<string | null>(null);
 
   const currentJob = jobs.find((j) => j.id === currentJobId);
   const currentTailored = tailoredResumes.find(
@@ -158,7 +159,9 @@ export default function AnalyzePage() {
 
       {/* Job tabs */}
       <div className="mb-5 flex items-center gap-2 flex-wrap">
-        {jobs.map((job) => (
+        {jobs.map((job) => {
+          const isHovered = hoveredJobId === job.id;
+          return (
           <div
             key={job.id}
             className={`group relative px-3 py-1.5 rounded-lg text-sm border transition-all ${
@@ -166,6 +169,8 @@ export default function AnalyzePage() {
                 ? "border-primary bg-primary/5 text-primary"
                 : "border-border hover:border-primary/30"
             }`}
+            onMouseEnter={() => setHoveredJobId(job.id)}
+            onMouseLeave={() => setHoveredJobId(null)}
           >
             <button
               onClick={() => setCurrentJob(job.id)}
@@ -190,25 +195,32 @@ export default function AnalyzePage() {
             </button>
 
             {/* Hover tooltip with job details */}
-            <div className="absolute left-0 top-full mt-2 w-[500px] max-w-[90vw] bg-card border border-border rounded-lg shadow-lg p-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
-              <div className="space-y-3">
-                <div>
-                  <h4 className="font-semibold text-sm mb-1">{job.company} - {job.title}</h4>
-                  <p className="text-xs text-muted-foreground">创建于 {new Date(job.createdAt).toLocaleDateString()}</p>
-                </div>
-
-                {job.rawText && (
+            {isHovered && (
+              <div
+                className="absolute left-0 top-full mt-2 w-[500px] max-w-[90vw] bg-card border border-border rounded-lg shadow-lg p-4 z-50"
+                onMouseEnter={() => setHoveredJobId(job.id)}
+                onMouseLeave={() => setHoveredJobId(null)}
+              >
+                <div className="space-y-3">
                   <div>
-                    <p className="text-xs font-medium text-muted-foreground mb-1.5">岗位描述（JD）</p>
-                    <div className="text-xs text-muted-foreground max-h-60 overflow-y-auto whitespace-pre-wrap bg-muted/30 rounded p-2">
-                      {job.rawText}
-                    </div>
+                    <h4 className="font-semibold text-sm mb-1">{job.company} - {job.title}</h4>
+                    <p className="text-xs text-muted-foreground">创建于 {new Date(job.createdAt).toLocaleDateString()}</p>
                   </div>
-                )}
+
+                  {job.rawText && (
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground mb-1.5">岗位描述（JD）</p>
+                      <div className="text-xs text-muted-foreground max-h-60 overflow-y-auto whitespace-pre-wrap bg-muted/30 rounded p-2">
+                        {job.rawText}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
           </div>
-        ))}
+          );
+        })}
         <Button
           variant="outline"
           size="sm"

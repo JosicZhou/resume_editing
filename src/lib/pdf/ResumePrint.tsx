@@ -405,9 +405,9 @@ export default ResumePrint;
 
 const pageRoot: React.CSSProperties = {
   fontFamily: FONT_FAMILY,
-  fontSize: "10pt",
+  fontSize: "9pt",
   color: "#1a1a1a",
-  lineHeight: 1.4,
+  lineHeight: 1.3,
   padding: "8mm 12mm 10mm 12mm",
   maxWidth: "210mm",
   margin: "0 auto",
@@ -451,9 +451,9 @@ const nameStyle: React.CSSProperties = {
 };
 
 const contactBlock: React.CSSProperties = {
-  fontSize: "9pt",
+  fontSize: "8.5pt",
   color: "#1a1a1a",
-  lineHeight: 1.75,
+  lineHeight: 1.6,
 };
 
 const contactLine: React.CSSProperties = {
@@ -486,7 +486,7 @@ const sectionWrap: React.CSSProperties = {
 };
 
 const sectionTitle: React.CSSProperties = {
-  fontSize: "11.5pt",
+  fontSize: "10.5pt",
   fontWeight: "bold",
   color: "#8B1A1A",
   borderBottom: "1.2px solid #333",
@@ -509,7 +509,7 @@ const entryRow: React.CSSProperties = {
 
 const entryBold: React.CSSProperties = {
   fontWeight: "bold",
-  fontSize: "10.5pt",
+  fontSize: "9.5pt",
   color: "#000",
   display: "inline-flex",
   alignItems: "center",
@@ -518,20 +518,20 @@ const entryBold: React.CSSProperties = {
 };
 
 const entryDate: React.CSSProperties = {
-  fontSize: "9.5pt",
+  fontSize: "8.5pt",
   color: "#000",
   whiteSpace: "nowrap",
   flexShrink: 0,
 };
 
 const entrySub: React.CSSProperties = {
-  fontSize: "10pt",
+  fontSize: "9pt",
   color: "#222",
   marginBottom: "1px",
 };
 
 const entryLocation: React.CSSProperties = {
-  fontSize: "9.5pt",
+  fontSize: "8.5pt",
   color: "#555",
   whiteSpace: "nowrap",
   flexShrink: 0,
@@ -562,8 +562,8 @@ const bulletList: React.CSSProperties = {
 };
 
 const bulletItem: React.CSSProperties = {
-  fontSize: "9.5pt",
-  lineHeight: 1.55,
+  fontSize: "9pt",
+  lineHeight: 1.45,
   marginBottom: "2px",
   color: "#1a1a1a",
 };
@@ -575,8 +575,8 @@ const numList: React.CSSProperties = {
 };
 
 const numItem: React.CSSProperties = {
-  fontSize: "9.5pt",
-  lineHeight: 1.55,
+  fontSize: "9pt",
+  lineHeight: 1.45,
   marginBottom: "2px",
   color: "#1a1a1a",
 };

@@ -403,7 +403,7 @@ export default function PreviewPage() {
                           </span>
                           {hasOptimized && (
                             <Button
-                              variant={isUsingOriginal ? "default" : "outline"}
+                              variant={isUsingOriginal ? "primary" : "outline"}
                               size="sm"
                               onClick={() => toggleUseOriginal(w.id)}
                               className="text-xs h-6 px-2"

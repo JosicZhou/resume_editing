@@ -135,6 +135,11 @@ export interface TailoredResume {
   selectedSkillIds: string[];
   selectedCustomSectionIds: string[];
   useOriginalIds: string[]; // IDs of work/project/campus that user chose to use original version
+  previewEdits: {
+    work?: Record<string, Partial<WorkExperience>>;
+    campus?: Record<string, Partial<WorkExperience>>;
+    projects?: Record<string, Partial<Project>>;
+  };
 }
 
 export interface JdAnalysisResult {

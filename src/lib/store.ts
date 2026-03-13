@@ -63,7 +63,6 @@ interface ResumeStore {
   updateTailoredPreviewWork: (tailoredId: string, workId: string, work: Partial<WorkExperience>) => void;
   updateTailoredPreviewCampus: (tailoredId: string, campusId: string, campus: Partial<WorkExperience>) => void;
   updateTailoredPreviewProject: (tailoredId: string, projectId: string, project: Partial<Project>) => void;
-  removeProject: (id: string) => void;
 
   addSkill: (skill: Skill) => void;
   updateSkill: (id: string, skill: Partial<Skill>) => void;

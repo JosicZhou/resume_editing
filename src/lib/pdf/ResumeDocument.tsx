@@ -225,32 +225,56 @@ export default function ResumeDocument({
             <Text style={styles.sectionTitle}>
               {getTitle("work", "工作/实习经历")}
             </Text>
-            {work.map((w) => (
-              <View key={w.id} style={{ marginBottom: 5 }}>
-                <View style={styles.entryHeader}>
-                  <View>
-                    <Text style={styles.entryTitle}>
-                      {w.company}
-                      {w.location ? ` · ${w.location}` : ""}
+            {work.map((w) => {
+              const activeSubModules = (w.subModules || []).filter(
+                (m) => m.title.trim() || m.descriptions.length > 0
+              );
+              return (
+                <View key={w.id} style={{ marginBottom: 5 }}>
+                  <View style={styles.entryHeader}>
+                    <View>
+                      <Text style={styles.entryTitle}>
+                        {w.company}
+                        {w.location ? ` · ${w.location}` : ""}
+                      </Text>
+                      <Text style={styles.entrySubtitle}>{w.title}</Text>
+                    </View>
+                    <Text style={styles.entryDate}>
+                      {w.startDate} - {w.endDate}
                     </Text>
-                    <Text style={styles.entrySubtitle}>{w.title}</Text>
                   </View>
-                  <Text style={styles.entryDate}>
-                    {w.startDate} - {w.endDate}
-                  </Text>
+                  {w.descriptions.length > 0 && (
+                    <View style={styles.bulletList}>
+                      {w.descriptions.map((d, i) => (
+                        <View key={i} style={styles.bulletItem}>
+                          <Text style={styles.bullet}>•</Text>
+                          <Text style={styles.bulletText}>{d}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  )}
+                  {activeSubModules.map((sm) => (
+                    <View key={sm.id} style={{ marginTop: 3 }}>
+                      {sm.title.trim() ? (
+                        <Text style={{ fontFamily: "STHeiti", fontWeight: "bold", fontSize: 9, marginBottom: 1 }}>
+                          【{sm.title}】
+                        </Text>
+                      ) : null}
+                      {sm.descriptions.length > 0 && (
+                        <View style={styles.bulletList}>
+                          {sm.descriptions.map((d, i) => (
+                            <View key={i} style={styles.bulletItem}>
+                              <Text style={styles.bullet}>•</Text>
+                              <Text style={styles.bulletText}>{d}</Text>
+                            </View>
+                          ))}
+                        </View>
+                      )}
+                    </View>
+                  ))}
                 </View>
-                {w.descriptions.length > 0 && (
-                  <View style={styles.bulletList}>
-                    {w.descriptions.map((d, i) => (
-                      <View key={i} style={styles.bulletItem}>
-                        <Text style={styles.bullet}>•</Text>
-                        <Text style={styles.bulletText}>{d}</Text>
-                      </View>
-                    ))}
-                  </View>
-                )}
-              </View>
-            ))}
+              );
+            })}
           </View>
         );
       case "campus":
@@ -260,32 +284,56 @@ export default function ResumeDocument({
             <Text style={styles.sectionTitle}>
               {getTitle("campus", "校园经历")}
             </Text>
-            {campus.map((c) => (
-              <View key={c.id} style={{ marginBottom: 5 }}>
-                <View style={styles.entryHeader}>
-                  <View>
-                    <Text style={styles.entryTitle}>
-                      {c.company}
-                      {c.location ? ` · ${c.location}` : ""}
+            {campus.map((c) => {
+              const activeSubModules = (c.subModules || []).filter(
+                (m) => m.title.trim() || m.descriptions.length > 0
+              );
+              return (
+                <View key={c.id} style={{ marginBottom: 5 }}>
+                  <View style={styles.entryHeader}>
+                    <View>
+                      <Text style={styles.entryTitle}>
+                        {c.company}
+                        {c.location ? ` · ${c.location}` : ""}
+                      </Text>
+                      <Text style={styles.entrySubtitle}>{c.title}</Text>
+                    </View>
+                    <Text style={styles.entryDate}>
+                      {c.startDate} - {c.endDate}
                     </Text>
-                    <Text style={styles.entrySubtitle}>{c.title}</Text>
                   </View>
-                  <Text style={styles.entryDate}>
-                    {c.startDate} - {c.endDate}
-                  </Text>
+                  {c.descriptions.length > 0 && (
+                    <View style={styles.bulletList}>
+                      {c.descriptions.map((d, i) => (
+                        <View key={i} style={styles.bulletItem}>
+                          <Text style={styles.bullet}>•</Text>
+                          <Text style={styles.bulletText}>{d}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  )}
+                  {activeSubModules.map((sm) => (
+                    <View key={sm.id} style={{ marginTop: 3 }}>
+                      {sm.title.trim() ? (
+                        <Text style={{ fontFamily: "STHeiti", fontWeight: "bold", fontSize: 9, marginBottom: 1 }}>
+                          【{sm.title}】
+                        </Text>
+                      ) : null}
+                      {sm.descriptions.length > 0 && (
+                        <View style={styles.bulletList}>
+                          {sm.descriptions.map((d, i) => (
+                            <View key={i} style={styles.bulletItem}>
+                              <Text style={styles.bullet}>•</Text>
+                              <Text style={styles.bulletText}>{d}</Text>
+                            </View>
+                          ))}
+                        </View>
+                      )}
+                    </View>
+                  ))}
                 </View>
-                {c.descriptions.length > 0 && (
-                  <View style={styles.bulletList}>
-                    {c.descriptions.map((d, i) => (
-                      <View key={i} style={styles.bulletItem}>
-                        <Text style={styles.bullet}>•</Text>
-                        <Text style={styles.bulletText}>{d}</Text>
-                      </View>
-                    ))}
-                  </View>
-                )}
-              </View>
-            ))}
+              );
+            })}
           </View>
         );
       case "project":

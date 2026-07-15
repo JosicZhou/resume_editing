@@ -618,7 +618,7 @@ export const useResumeStore = create<ResumeStore>()(
     {
       name: "resume-store",
       skipHydration: true,
-      version: 13,
+      version: 14,
       migrate: (persistedState: any, version: number) => {
         if (version < 6) {
           return { ...persistedState, optimizePrompts: DEFAULT_PROMPTS };
@@ -694,6 +694,23 @@ export const useResumeStore = create<ResumeStore>()(
               ...t,
               useOriginalIds: t.useOriginalIds || [],
             })),
+          };
+        }
+        if (version < 14) {
+          const state = persistedState as any;
+          return {
+            ...state,
+            resume: {
+              ...state.resume,
+              work: (state.resume?.work || []).map((w: any) => ({
+                ...w,
+                subModules: w.subModules || [],
+              })),
+              campus: (state.resume?.campus || []).map((c: any) => ({
+                ...c,
+                subModules: c.subModules || [],
+              })),
+            },
           };
         }
         return persistedState;

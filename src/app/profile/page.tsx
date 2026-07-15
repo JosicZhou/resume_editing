@@ -269,6 +269,66 @@ function EducationSection() {
   );
 }
 
+function SubModulesEditor({
+  subModules,
+  onChange,
+  descriptionLabel,
+}: {
+  subModules: import("@/lib/types").WorkSubModule[];
+  onChange: (subModules: import("@/lib/types").WorkSubModule[]) => void;
+  descriptionLabel: string;
+}) {
+  const addModule = () => {
+    onChange([...subModules, { id: generateId(), title: "", descriptions: [] }]);
+  };
+
+  const updateModule = (id: string, patch: Partial<import("@/lib/types").WorkSubModule>) => {
+    onChange(subModules.map((m) => (m.id === id ? { ...m, ...patch } : m)));
+  };
+
+  const removeModule = (id: string) => {
+    onChange(subModules.filter((m) => m.id !== id));
+  };
+
+  return (
+    <div className="space-y-3">
+      {subModules.map((mod) => (
+        <div key={mod.id} className="border border-dashed border-border rounded-md p-3 space-y-2 bg-muted/30">
+          <div className="flex items-center gap-2">
+            <Input
+              value={mod.title}
+              onChange={(e) => updateModule(mod.id, { title: e.target.value })}
+              placeholder="模块名称，如：岗位职责"
+              className="flex-1 text-sm font-medium"
+            />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => removeModule(mod.id)}
+              className="text-destructive shrink-0"
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
+          <Textarea
+            value={mod.descriptions.join("\n")}
+            onChange={(e) =>
+              updateModule(mod.id, {
+                descriptions: e.target.value.split("\n").filter(Boolean),
+              })
+            }
+            placeholder="每行一条描述..."
+            rows={3}
+          />
+        </div>
+      ))}
+      <Button variant="outline" size="sm" onClick={addModule} className="w-full text-xs">
+        <Plus className="w-3.5 h-3.5" /> 添加模块（如：岗位职责 / 核心项目）
+      </Button>
+    </div>
+  );
+}
+
 function WorkSection() {
   const work = useResumeStore((s) => s.resume.work);
   const addWork = useResumeStore((s) => s.addWork);
@@ -285,6 +345,7 @@ function WorkSection() {
       endDate: "",
       descriptions: [],
       tags: [],
+      subModules: [],
     });
   };
 
@@ -347,6 +408,16 @@ function WorkSection() {
             />
           </div>
           <div>
+            <label className="text-sm font-medium text-foreground mb-2 block">
+              子模块（可选：为该经历添加「岗位职责」「核心项目」等分块）
+            </label>
+            <SubModulesEditor
+              subModules={w.subModules || []}
+              onChange={(subModules) => updateWork(w.id, { subModules })}
+              descriptionLabel="工作描述"
+            />
+          </div>
+          <div>
             <label className="text-sm font-medium text-foreground mb-1.5 block">
               标签（逗号分隔，用于AI匹配）
             </label>
@@ -385,6 +456,7 @@ function CampusSection() {
       endDate: "",
       descriptions: [],
       tags: [],
+      subModules: [],
     });
   };
 
@@ -444,6 +516,16 @@ function CampusSection() {
               }
               placeholder="描述参与内容、取得成果..."
               rows={4}
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium text-foreground mb-2 block">
+              子模块（可选：为该经历添加「职责描述」「核心项目」等分块）
+            </label>
+            <SubModulesEditor
+              subModules={c.subModules || []}
+              onChange={(subModules) => updateCampus(c.id, { subModules })}
+              descriptionLabel="经历描述"
             />
           </div>
           <div>

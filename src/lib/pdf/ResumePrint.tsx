@@ -124,22 +124,44 @@ const ResumePrint = React.forwardRef<HTMLDivElement, ResumePrintProps>(
           return (
             <section key={mod.id} style={sectionWrap}>
               <div style={sectionTitle}>{getTitle("work", "工作/实习经历")}</div>
-              {work.map((w) => (
-                <div key={w.id} style={entryWrap}>
-                  <div style={{display: "flex", alignItems: "baseline", gap: "8px"}}>
-                    <span style={{...entryBold, flex: 1, minWidth: "0"}}>{w.company}</span>
-                    <span style={{...entryBold, width: "180px", flexShrink: 0, marginRight: "100px"}}>{w.title}</span>
-                    <span style={{...entryBold, fontSize: "8.5pt", whiteSpace: "nowrap", position: "absolute", right: "12mm"}}>{w.startDate} — {w.endDate}</span>
+              {work.map((w) => {
+                const activeSubModules = (w.subModules || []).filter(
+                  (m) => m.title.trim() || m.descriptions.length > 0
+                );
+                const flatDescs = getDesc(w.id, w.descriptions);
+                return (
+                  <div key={w.id} style={entryWrap}>
+                    <div style={{display: "flex", alignItems: "baseline", gap: "8px"}}>
+                      <span style={{...entryBold, flex: 1, minWidth: "0"}}>{w.company}</span>
+                      <span style={{...entryBold, width: "180px", flexShrink: 0, marginRight: "100px"}}>{w.title}</span>
+                      <span style={{...entryBold, fontSize: "8.5pt", whiteSpace: "nowrap", position: "absolute", right: "12mm"}}>{w.startDate} — {w.endDate}</span>
+                    </div>
+                    {flatDescs.length > 0 && (
+                      <ol style={numList}>
+                        {flatDescs.map((d, i) => (
+                          <li key={i} style={numItem}>{d}</li>
+                        ))}
+                      </ol>
+                    )}
+                    {activeSubModules.map((mod) => (
+                      <div key={mod.id} style={{ marginTop: "3px" }}>
+                        {mod.title.trim() && (
+                          <div style={{ fontWeight: "bold", fontSize: "9pt", marginBottom: "1px" }}>
+                            【{mod.title}】
+                          </div>
+                        )}
+                        {mod.descriptions.length > 0 && (
+                          <ol style={numList}>
+                            {mod.descriptions.map((d, i) => (
+                              <li key={i} style={numItem}>{d}</li>
+                            ))}
+                          </ol>
+                        )}
+                      </div>
+                    ))}
                   </div>
-                  {getDesc(w.id, w.descriptions).length > 0 && (
-                    <ol style={numList}>
-                      {getDesc(w.id, w.descriptions).map((d, i) => (
-                        <li key={i} style={numItem}>{d}</li>
-                      ))}
-                    </ol>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </section>
           );
 
@@ -148,22 +170,44 @@ const ResumePrint = React.forwardRef<HTMLDivElement, ResumePrintProps>(
           return (
             <section key={mod.id} style={sectionWrap}>
               <div style={sectionTitle}>{getTitle("campus", "校园经历")}</div>
-              {campus.map((c) => (
-                <div key={c.id} style={entryWrap}>
-                  <div style={{display: "flex", alignItems: "baseline", gap: "8px"}}>
-                    <span style={{...entryBold, flex: 1, minWidth: "0"}}>{c.company}</span>
-                    <span style={{...entryBold, width: "180px", flexShrink: 0, marginRight: "100px"}}>{c.title}</span>
-                    <span style={{...entryBold, fontSize: "8.5pt", whiteSpace: "nowrap", position: "absolute", right: "12mm"}}>{c.startDate} — {c.endDate}</span>
+              {campus.map((c) => {
+                const activeSubModules = (c.subModules || []).filter(
+                  (m) => m.title.trim() || m.descriptions.length > 0
+                );
+                const flatDescs = getDesc(c.id, c.descriptions);
+                return (
+                  <div key={c.id} style={entryWrap}>
+                    <div style={{display: "flex", alignItems: "baseline", gap: "8px"}}>
+                      <span style={{...entryBold, flex: 1, minWidth: "0"}}>{c.company}</span>
+                      <span style={{...entryBold, width: "180px", flexShrink: 0, marginRight: "100px"}}>{c.title}</span>
+                      <span style={{...entryBold, fontSize: "8.5pt", whiteSpace: "nowrap", position: "absolute", right: "12mm"}}>{c.startDate} — {c.endDate}</span>
+                    </div>
+                    {flatDescs.length > 0 && (
+                      <ol style={numList}>
+                        {flatDescs.map((d, i) => (
+                          <li key={i} style={numItem}>{d}</li>
+                        ))}
+                      </ol>
+                    )}
+                    {activeSubModules.map((mod) => (
+                      <div key={mod.id} style={{ marginTop: "3px" }}>
+                        {mod.title.trim() && (
+                          <div style={{ fontWeight: "bold", fontSize: "9pt", marginBottom: "1px" }}>
+                            【{mod.title}】
+                          </div>
+                        )}
+                        {mod.descriptions.length > 0 && (
+                          <ol style={numList}>
+                            {mod.descriptions.map((d, i) => (
+                              <li key={i} style={numItem}>{d}</li>
+                            ))}
+                          </ol>
+                        )}
+                      </div>
+                    ))}
                   </div>
-                  {getDesc(c.id, c.descriptions).length > 0 && (
-                    <ol style={numList}>
-                      {getDesc(c.id, c.descriptions).map((d, i) => (
-                        <li key={i} style={numItem}>{d}</li>
-                      ))}
-                    </ol>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </section>
           );
 

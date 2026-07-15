@@ -24,6 +24,12 @@ export interface Education {
   rankTags?: string[]; // e.g. ["QS前100", "USNEWS100"]
 }
 
+export interface WorkSubModule {
+  id: string;
+  title: string;
+  descriptions: string[];
+}
+
 export interface WorkExperience {
   id: string;
   company: string;
@@ -33,6 +39,7 @@ export interface WorkExperience {
   endDate: string;
   descriptions: string[];
   tags: string[];
+  subModules?: WorkSubModule[];
 }
 
 export interface Project {

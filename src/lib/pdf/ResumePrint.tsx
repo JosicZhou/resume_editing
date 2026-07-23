@@ -137,11 +137,11 @@ const ResumePrint = React.forwardRef<HTMLDivElement, ResumePrintProps>(
                       <span style={{...entryBold, fontSize: "8.5pt", whiteSpace: "nowrap", position: "absolute", right: "12mm"}}>{w.startDate} — {w.endDate}</span>
                     </div>
                     {flatDescs.length > 0 && (
-                      <ol style={numList}>
+                      <ul style={numList}>
                         {flatDescs.map((d, i) => (
                           <li key={i} style={numItem}>{d}</li>
                         ))}
-                      </ol>
+                      </ul>
                     )}
                     {activeSubModules.map((mod) => (
                       <div key={mod.id} style={{ marginTop: "3px" }}>
@@ -151,11 +151,11 @@ const ResumePrint = React.forwardRef<HTMLDivElement, ResumePrintProps>(
                           </div>
                         )}
                         {mod.descriptions.length > 0 && (
-                          <ol style={numList}>
+                          <ul style={numList}>
                             {mod.descriptions.map((d, i) => (
                               <li key={i} style={numItem}>{d}</li>
                             ))}
-                          </ol>
+                          </ul>
                         )}
                       </div>
                     ))}
@@ -183,11 +183,11 @@ const ResumePrint = React.forwardRef<HTMLDivElement, ResumePrintProps>(
                       <span style={{...entryBold, fontSize: "8.5pt", whiteSpace: "nowrap", position: "absolute", right: "12mm"}}>{c.startDate} — {c.endDate}</span>
                     </div>
                     {flatDescs.length > 0 && (
-                      <ol style={numList}>
+                      <ul style={numList}>
                         {flatDescs.map((d, i) => (
                           <li key={i} style={numItem}>{d}</li>
                         ))}
-                      </ol>
+                      </ul>
                     )}
                     {activeSubModules.map((mod) => (
                       <div key={mod.id} style={{ marginTop: "3px" }}>
@@ -197,11 +197,11 @@ const ResumePrint = React.forwardRef<HTMLDivElement, ResumePrintProps>(
                           </div>
                         )}
                         {mod.descriptions.length > 0 && (
-                          <ol style={numList}>
+                          <ul style={numList}>
                             {mod.descriptions.map((d, i) => (
                               <li key={i} style={numItem}>{d}</li>
                             ))}
-                          </ol>
+                          </ul>
                         )}
                       </div>
                     ))}
@@ -229,11 +229,11 @@ const ResumePrint = React.forwardRef<HTMLDivElement, ResumePrintProps>(
                     </div>
                   )}
                   {getDesc(p.id, p.descriptions).length > 0 && (
-                    <ol style={numList}>
+                    <ul style={numList}>
                       {getDesc(p.id, p.descriptions).map((d, i) => (
                         <li key={i} style={numItem}>{d}</li>
                       ))}
-                    </ol>
+                    </ul>
                   )}
                 </div>
               ))}
@@ -603,9 +603,9 @@ const bulletItem: React.CSSProperties = {
 };
 
 const numList: React.CSSProperties = {
-  paddingLeft: "18px",
+  paddingLeft: "16px",
   margin: "2px 0 0 0",
-  listStyleType: "decimal",
+  listStyleType: "disc",
 };
 
 const numItem: React.CSSProperties = {

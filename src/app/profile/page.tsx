@@ -22,6 +22,21 @@ import { generateId, type WorkExperience, type CustomSection } from "@/lib/types
 import { useState } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 function PersonalSection() {
   const personal = useResumeStore((s) => s.resume.personal);
@@ -329,11 +344,133 @@ function SubModulesEditor({
   );
 }
 
+function SortableWorkItem({
+  w,
+  updateWork,
+  removeWork,
+}: {
+  w: WorkExperience;
+  updateWork: (id: string, data: Partial<WorkExperience>) => void;
+  removeWork: (id: string) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: w.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} className="border border-border rounded-lg p-4 space-y-3 bg-background">
+      <div className="flex justify-between items-start">
+        <button
+          {...attributes}
+          {...listeners}
+          className="mt-1 mr-2 cursor-grab text-muted-foreground hover:text-foreground shrink-0"
+          aria-label="拖拽排序"
+        >
+          <GripVertical className="w-4 h-4" />
+        </button>
+        <div className="grid grid-cols-2 gap-3 flex-1">
+          <Input
+            value={w.company}
+            onChange={(e) => updateWork(w.id, { company: e.target.value })}
+            placeholder="公司名称"
+          />
+          <Input
+            value={w.title}
+            onChange={(e) => updateWork(w.id, { title: e.target.value })}
+            placeholder="职位"
+          />
+          <Input
+            value={w.location}
+            onChange={(e) => updateWork(w.id, { location: e.target.value })}
+            placeholder="地点"
+          />
+          <div className="flex gap-2">
+            <Input
+              value={w.startDate}
+              onChange={(e) => updateWork(w.id, { startDate: e.target.value })}
+              placeholder="开始时间"
+            />
+            <Input
+              value={w.endDate}
+              onChange={(e) => updateWork(w.id, { endDate: e.target.value })}
+              placeholder="结束时间"
+            />
+          </div>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => removeWork(w.id)}
+          className="ml-2 text-destructive"
+        >
+          <Trash2 className="w-4 h-4" />
+        </Button>
+      </div>
+      <div>
+        <label className="text-sm font-medium text-foreground mb-1.5 block">
+          工作描述（每行一条，建议STAR法则）
+        </label>
+        <Textarea
+          value={w.descriptions.join("\n")}
+          onChange={(e) =>
+            updateWork(w.id, {
+              descriptions: e.target.value.split("\n").filter(Boolean),
+            })
+          }
+          placeholder="负责了xxx，通过xxx方法，实现了xxx效果..."
+          rows={4}
+        />
+      </div>
+      <div>
+        <label className="text-sm font-medium text-foreground mb-2 block">
+          子模块（可选：为该经历添加「岗位职责」「核心项目」等分块）
+        </label>
+        <SubModulesEditor
+          subModules={w.subModules || []}
+          onChange={(subModules) => updateWork(w.id, { subModules })}
+          descriptionLabel="工作描述"
+        />
+      </div>
+      <div>
+        <label className="text-sm font-medium text-foreground mb-1.5 block">
+          标签（逗号分隔，用于AI匹配）
+        </label>
+        <Input
+          value={w.tags.join(", ")}
+          onChange={(e) =>
+            updateWork(w.id, {
+              tags: e.target.value.split(",").map((t) => t.trim()).filter(Boolean),
+            })
+          }
+          placeholder="产品管理, 数据分析, 用户研究"
+        />
+      </div>
+    </div>
+  );
+}
+
 function WorkSection() {
   const work = useResumeStore((s) => s.resume.work);
   const addWork = useResumeStore((s) => s.addWork);
   const updateWork = useResumeStore((s) => s.updateWork);
   const removeWork = useResumeStore((s) => s.removeWork);
+  const reorderWork = useResumeStore((s) => s.reorderWork);
+
+  const sensors = useSensors(useSensor(PointerSensor));
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      const oldIndex = work.findIndex((w) => w.id === active.id);
+      const newIndex = work.findIndex((w) => w.id === over.id);
+      reorderWork(arrayMove(work, oldIndex, newIndex).map((w) => w.id));
+    }
+  };
 
   const handleAdd = () => {
     addWork({
@@ -351,91 +488,126 @@ function WorkSection() {
 
   return (
     <div className="space-y-4">
-      {work.map((w) => (
-        <div key={w.id} className="border border-border rounded-lg p-4 space-y-3 bg-background">
-          <div className="flex justify-between items-start">
-            <div className="grid grid-cols-2 gap-3 flex-1">
-              <Input
-                value={w.company}
-                onChange={(e) => updateWork(w.id, { company: e.target.value })}
-                placeholder="公司名称"
-              />
-              <Input
-                value={w.title}
-                onChange={(e) => updateWork(w.id, { title: e.target.value })}
-                placeholder="职位"
-              />
-              <Input
-                value={w.location}
-                onChange={(e) => updateWork(w.id, { location: e.target.value })}
-                placeholder="地点"
-              />
-              <div className="flex gap-2">
-                <Input
-                  value={w.startDate}
-                  onChange={(e) => updateWork(w.id, { startDate: e.target.value })}
-                  placeholder="开始时间"
-                />
-                <Input
-                  value={w.endDate}
-                  onChange={(e) => updateWork(w.id, { endDate: e.target.value })}
-                  placeholder="结束时间"
-                />
-              </div>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => removeWork(w.id)}
-              className="ml-2 text-destructive"
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
-          </div>
-          <div>
-            <label className="text-sm font-medium text-foreground mb-1.5 block">
-              工作描述（每行一条，建议STAR法则）
-            </label>
-            <Textarea
-              value={w.descriptions.join("\n")}
-              onChange={(e) =>
-                updateWork(w.id, {
-                  descriptions: e.target.value.split("\n").filter(Boolean),
-                })
-              }
-              placeholder="负责了xxx，通过xxx方法，实现了xxx效果..."
-              rows={4}
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-foreground mb-2 block">
-              子模块（可选：为该经历添加「岗位职责」「核心项目」等分块）
-            </label>
-            <SubModulesEditor
-              subModules={w.subModules || []}
-              onChange={(subModules) => updateWork(w.id, { subModules })}
-              descriptionLabel="工作描述"
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-foreground mb-1.5 block">
-              标签（逗号分隔，用于AI匹配）
-            </label>
-            <Input
-              value={w.tags.join(", ")}
-              onChange={(e) =>
-                updateWork(w.id, {
-                  tags: e.target.value.split(",").map((t) => t.trim()).filter(Boolean),
-                })
-              }
-              placeholder="产品管理, 数据分析, 用户研究"
-            />
-          </div>
-        </div>
-      ))}
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={work.map((w) => w.id)} strategy={verticalListSortingStrategy}>
+          {work.map((w) => (
+            <SortableWorkItem key={w.id} w={w} updateWork={updateWork} removeWork={removeWork} />
+          ))}
+        </SortableContext>
+      </DndContext>
       <Button variant="outline" size="sm" onClick={handleAdd} className="w-full">
         <Plus className="w-4 h-4" /> 添加工作经历
       </Button>
+    </div>
+  );
+}
+
+function SortableCampusItem({
+  c,
+  updateCampus,
+  removeCampus,
+}: {
+  c: WorkExperience;
+  updateCampus: (id: string, data: Partial<WorkExperience>) => void;
+  removeCampus: (id: string) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: c.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} className="border border-border rounded-lg p-4 space-y-3 bg-background">
+      <div className="flex justify-between items-start">
+        <button
+          {...attributes}
+          {...listeners}
+          className="mt-1 mr-2 cursor-grab text-muted-foreground hover:text-foreground shrink-0"
+          aria-label="拖拽排序"
+        >
+          <GripVertical className="w-4 h-4" />
+        </button>
+        <div className="grid grid-cols-2 gap-3 flex-1">
+          <Input
+            value={c.company}
+            onChange={(e) => updateCampus(c.id, { company: e.target.value })}
+            placeholder="组织/社团/学校"
+          />
+          <Input
+            value={c.title}
+            onChange={(e) => updateCampus(c.id, { title: e.target.value })}
+            placeholder="职位/角色"
+          />
+          <Input
+            value={c.location}
+            onChange={(e) => updateCampus(c.id, { location: e.target.value })}
+            placeholder="地点"
+          />
+          <div className="flex gap-2">
+            <Input
+              value={c.startDate}
+              onChange={(e) => updateCampus(c.id, { startDate: e.target.value })}
+              placeholder="开始时间"
+            />
+            <Input
+              value={c.endDate}
+              onChange={(e) => updateCampus(c.id, { endDate: e.target.value })}
+              placeholder="结束时间"
+            />
+          </div>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => removeCampus(c.id)}
+          className="ml-2 text-destructive"
+        >
+          <Trash2 className="w-4 h-4" />
+        </Button>
+      </div>
+      <div>
+        <label className="text-sm font-medium text-foreground mb-1.5 block">
+          经历描述（每行一条）
+        </label>
+        <Textarea
+          value={c.descriptions.join("\n")}
+          onChange={(e) =>
+            updateCampus(c.id, {
+              descriptions: e.target.value.split("\n").filter(Boolean),
+            })
+          }
+          placeholder="描述参与内容、取得成果..."
+          rows={4}
+        />
+      </div>
+      <div>
+        <label className="text-sm font-medium text-foreground mb-2 block">
+          子模块（可选：为该经历添加「职责描述」「核心项目」等分块）
+        </label>
+        <SubModulesEditor
+          subModules={c.subModules || []}
+          onChange={(subModules) => updateCampus(c.id, { subModules })}
+          descriptionLabel="经历描述"
+        />
+      </div>
+      <div>
+        <label className="text-sm font-medium text-foreground mb-1.5 block">
+          标签（逗号分隔）
+        </label>
+        <Input
+          value={c.tags.join(", ")}
+          onChange={(e) =>
+            updateCampus(c.id, {
+              tags: e.target.value.split(",").map((t) => t.trim()).filter(Boolean),
+            })
+          }
+          placeholder="学生会, 组织管理, 活动策划"
+        />
+      </div>
     </div>
   );
 }
@@ -445,6 +617,18 @@ function CampusSection() {
   const addCampus = useResumeStore((s) => s.addCampus);
   const updateCampus = useResumeStore((s) => s.updateCampus);
   const removeCampus = useResumeStore((s) => s.removeCampus);
+  const reorderCampus = useResumeStore((s) => s.reorderCampus);
+
+  const sensors = useSensors(useSensor(PointerSensor));
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      const oldIndex = campus.findIndex((c) => c.id === active.id);
+      const newIndex = campus.findIndex((c) => c.id === over.id);
+      reorderCampus(arrayMove(campus, oldIndex, newIndex).map((c) => c.id));
+    }
+  };
 
   const handleAdd = () => {
     addCampus({
@@ -462,88 +646,13 @@ function CampusSection() {
 
   return (
     <div className="space-y-4">
-      {campus.map((c) => (
-        <div key={c.id} className="border border-border rounded-lg p-4 space-y-3 bg-background">
-          <div className="flex justify-between items-start">
-            <div className="grid grid-cols-2 gap-3 flex-1">
-              <Input
-                value={c.company}
-                onChange={(e) => updateCampus(c.id, { company: e.target.value })}
-                placeholder="组织/社团/学校"
-              />
-              <Input
-                value={c.title}
-                onChange={(e) => updateCampus(c.id, { title: e.target.value })}
-                placeholder="职位/角色"
-              />
-              <Input
-                value={c.location}
-                onChange={(e) => updateCampus(c.id, { location: e.target.value })}
-                placeholder="地点"
-              />
-              <div className="flex gap-2">
-                <Input
-                  value={c.startDate}
-                  onChange={(e) => updateCampus(c.id, { startDate: e.target.value })}
-                  placeholder="开始时间"
-                />
-                <Input
-                  value={c.endDate}
-                  onChange={(e) => updateCampus(c.id, { endDate: e.target.value })}
-                  placeholder="结束时间"
-                />
-              </div>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => removeCampus(c.id)}
-              className="ml-2 text-destructive"
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
-          </div>
-          <div>
-            <label className="text-sm font-medium text-foreground mb-1.5 block">
-              经历描述（每行一条）
-            </label>
-            <Textarea
-              value={c.descriptions.join("\n")}
-              onChange={(e) =>
-                updateCampus(c.id, {
-                  descriptions: e.target.value.split("\n").filter(Boolean),
-                })
-              }
-              placeholder="描述参与内容、取得成果..."
-              rows={4}
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-foreground mb-2 block">
-              子模块（可选：为该经历添加「职责描述」「核心项目」等分块）
-            </label>
-            <SubModulesEditor
-              subModules={c.subModules || []}
-              onChange={(subModules) => updateCampus(c.id, { subModules })}
-              descriptionLabel="经历描述"
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-foreground mb-1.5 block">
-              标签（逗号分隔）
-            </label>
-            <Input
-              value={c.tags.join(", ")}
-              onChange={(e) =>
-                updateCampus(c.id, {
-                  tags: e.target.value.split(",").map((t) => t.trim()).filter(Boolean),
-                })
-              }
-              placeholder="学生会, 组织管理, 活动策划"
-            />
-          </div>
-        </div>
-      ))}
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={campus.map((c) => c.id)} strategy={verticalListSortingStrategy}>
+          {campus.map((c) => (
+            <SortableCampusItem key={c.id} c={c} updateCampus={updateCampus} removeCampus={removeCampus} />
+          ))}
+        </SortableContext>
+      </DndContext>
       <Button variant="outline" size="sm" onClick={handleAdd} className="w-full">
         <Plus className="w-4 h-4" /> 添加校园经历
       </Button>

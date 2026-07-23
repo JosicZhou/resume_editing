@@ -50,10 +50,12 @@ interface ResumeStore {
   addWork: (work: WorkExperience) => void;
   updateWork: (id: string, work: Partial<WorkExperience>) => void;
   removeWork: (id: string) => void;
+  reorderWork: (ids: string[]) => void;
 
   addCampus: (campus: WorkExperience) => void;
   updateCampus: (id: string, campus: Partial<WorkExperience>) => void;
   removeCampus: (id: string) => void;
+  reorderCampus: (ids: string[]) => void;
 
   addProject: (project: Project) => void;
   updateProject: (id: string, project: Partial<Project>) => void;
@@ -259,6 +261,13 @@ export const useResumeStore = create<ResumeStore>()(
         set((s) => ({
           resume: { ...s.resume, work: s.resume.work.filter((w) => w.id !== id) },
         })),
+      reorderWork: (ids) =>
+        set((s) => ({
+          resume: {
+            ...s.resume,
+            work: ids.map((id) => s.resume.work.find((w) => w.id === id)!),
+          },
+        })),
 
       addCampus: (campus) =>
         set((s) => ({
@@ -297,6 +306,13 @@ export const useResumeStore = create<ResumeStore>()(
       removeCampus: (id) =>
         set((s) => ({
           resume: { ...s.resume, campus: (s.resume.campus || []).filter((c) => c.id !== id) },
+        })),
+      reorderCampus: (ids) =>
+        set((s) => ({
+          resume: {
+            ...s.resume,
+            campus: ids.map((id) => (s.resume.campus || []).find((c) => c.id === id)!),
+          },
         })),
 
       addProject: (project) =>

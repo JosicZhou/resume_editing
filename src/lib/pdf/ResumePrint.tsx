@@ -603,9 +603,9 @@ const bulletItem: React.CSSProperties = {
 };
 
 const numList: React.CSSProperties = {
-  paddingLeft: "16px",
+  paddingLeft: "0",
   margin: "2px 0 0 0",
-  listStyleType: "disc",
+  listStyleType: "none",
 };
 
 const numItem: React.CSSProperties = {

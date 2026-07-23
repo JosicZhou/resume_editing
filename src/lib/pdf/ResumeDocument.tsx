@@ -90,19 +90,17 @@ const styles = StyleSheet.create({
     color: "#000000",
   },
   bulletList: {
-    paddingLeft: 8,
+    paddingLeft: 0,
     marginTop: 2,
   },
   bulletItem: {
-    flexDirection: "row",
     marginBottom: 1.5,
   },
   bullet: {
-    width: 8,
+    width: 0,
     fontSize: 9,
   },
   bulletText: {
-    flex: 1,
     fontSize: 9,
     lineHeight: 1.4,
   },
@@ -208,7 +206,6 @@ export default function ResumeDocument({
                   <View style={styles.bulletList}>
                     {edu.highlights.map((h, i) => (
                       <View key={i} style={styles.bulletItem}>
-                        <Text style={styles.bullet}>•</Text>
                         <Text style={styles.bulletText}>{h}</Text>
                       </View>
                     ))}
@@ -247,7 +244,6 @@ export default function ResumeDocument({
                     <View style={styles.bulletList}>
                       {w.descriptions.map((d, i) => (
                         <View key={i} style={styles.bulletItem}>
-                          <Text style={styles.bullet}>•</Text>
                           <Text style={styles.bulletText}>{d}</Text>
                         </View>
                       ))}
@@ -264,7 +260,6 @@ export default function ResumeDocument({
                         <View style={styles.bulletList}>
                           {sm.descriptions.map((d, i) => (
                             <View key={i} style={styles.bulletItem}>
-                              <Text style={styles.bullet}>•</Text>
                               <Text style={styles.bulletText}>{d}</Text>
                             </View>
                           ))}
@@ -306,7 +301,6 @@ export default function ResumeDocument({
                     <View style={styles.bulletList}>
                       {c.descriptions.map((d, i) => (
                         <View key={i} style={styles.bulletItem}>
-                          <Text style={styles.bullet}>•</Text>
                           <Text style={styles.bulletText}>{d}</Text>
                         </View>
                       ))}
@@ -323,7 +317,6 @@ export default function ResumeDocument({
                         <View style={styles.bulletList}>
                           {sm.descriptions.map((d, i) => (
                             <View key={i} style={styles.bulletItem}>
-                              <Text style={styles.bullet}>•</Text>
                               <Text style={styles.bulletText}>{d}</Text>
                             </View>
                           ))}
@@ -365,7 +358,6 @@ export default function ResumeDocument({
                   <View style={styles.bulletList}>
                     {p.descriptions.map((d, i) => (
                       <View key={i} style={styles.bulletItem}>
-                        <Text style={styles.bullet}>•</Text>
                         <Text style={styles.bulletText}>{d}</Text>
                       </View>
                     ))}
@@ -399,7 +391,6 @@ export default function ResumeDocument({
             </Text>
             {resume.awards.map((a) => (
               <View key={a.id} style={styles.bulletItem}>
-                <Text style={styles.bullet}>•</Text>
                 <Text style={styles.bulletText}>
                   {a.name}
                   {a.date ? ` (${a.date})` : ""}
